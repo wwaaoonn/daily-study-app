@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
+import { getCurrentUser } from "@/app/lib/auth";
 import { getDashboardStats } from "@/app/lib/dashboard";
 import { getQuestionReturnHref } from "@/app/lib/navigation";
 
@@ -99,12 +101,18 @@ type DashboardPageProps = {
 };
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const params = searchParams ? await searchParams : undefined;
   const returnMode = params?.return_mode === "challenge" ? "challenge" : "daily";
   const returnQuestionId = params?.return_question_id;
   const [stats, fallbackQuestionReturnHref] = await Promise.all([
-    getDashboardStats(),
-    getQuestionReturnHref(),
+    getDashboardStats(user.id),
+    getQuestionReturnHref(user.id),
   ]);
   const questionReturnHref = returnQuestionId
     ? `/?mode=${returnMode}&question_id=${returnQuestionId}`
@@ -123,7 +131,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <header className="dashboard-header">
           <div>
             <p className="dashboard-eyebrow">Learning Dashboard</p>
-            <h1 className="dashboard-title">Takatoさんの回答状況</h1>
+            <h1 className="dashboard-title">{user.name ?? user.email}さんの回答状況</h1>
             <p className="dashboard-subtitle">
               学習の偏り、正答率、継続日数をまとめて確認できます。
             </p>
@@ -132,6 +140,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <Link href={questionReturnHref} className="dashboard-secondary-link">
               問題に戻る
             </Link>
+            <form action="/api/auth/signout" method="post">
+              <button type="submit" className="dashboard-secondary-button">
+                ログアウト
+              </button>
+            </form>
           </div>
         </header>
 

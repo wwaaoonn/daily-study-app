@@ -1,9 +1,8 @@
-import { getDefaultUser } from "@/app/lib/default-user";
 import { prisma } from "@/app/lib/prisma";
 import { getDailyQuestion, getJstDayRange } from "@/app/lib/question";
 
-export async function getQuestionReturnHref() {
-  const [user, dailyQuestion] = await Promise.all([getDefaultUser(), getDailyQuestion()]);
+export async function getQuestionReturnHref(userId: string) {
+  const dailyQuestion = await getDailyQuestion();
 
   if (!dailyQuestion) {
     return "/";
@@ -12,7 +11,7 @@ export async function getQuestionReturnHref() {
   const { start, end } = getJstDayRange();
   const dailyAnswer = await prisma.answer.findFirst({
     where: {
-      user_id: user.id,
+      user_id: userId,
       question_id: dailyQuestion.id,
       answered_at: {
         gte: start,
