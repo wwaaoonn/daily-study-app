@@ -22,3 +22,6 @@
 - Total attempts
 - Correct rate
 - Category performance
+- Answer activity calendar
+- Current streak / longest streak
+- Link from the main question screen to the dashboard

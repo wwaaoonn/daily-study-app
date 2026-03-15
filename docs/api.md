@@ -78,3 +78,40 @@ If `exclude_question_id` is provided and another question exists, the API return
   "choice_d": "Rome"
 }
 ```
+
+## 4. Get Dashboard Stats
+
+Return the current user's learning dashboard summary.
+
+### Endpoint
+
+GET /api/dashboard
+
+### Response
+
+```json
+{
+  "totalAttempts": 42,
+  "correctAttempts": 31,
+  "correctRate": 73.8,
+  "activeDays": 12,
+  "currentStreak": 4,
+  "longestStreak": 6,
+  "recentAttempts": 11,
+  "categoryBreakdown": [
+    {
+      "category": "Vocabulary",
+      "attempts": 20,
+      "correctAttempts": 16,
+      "correctRate": 80,
+      "share": 47.6
+    }
+  ],
+  "answeredDates": [
+    {
+      "date": "2026-03-15",
+      "count": 3
+    }
+  ]
+}
+```

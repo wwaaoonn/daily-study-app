@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type ChoiceKey = "A" | "B" | "C" | "D";
@@ -182,8 +183,15 @@ export function DailyQuestionScreen() {
     <main className="mission-shell">
       <section className="mission-panel">
         <header className="mission-header">
-          <p className="mission-eyebrow">{eyebrowText}</p>
-          <h1 className="mission-greeting">{displayName}さん、{greetingText}</h1>
+          <div className="mission-header-row">
+            <div>
+              <p className="mission-eyebrow">{eyebrowText}</p>
+              <h1 className="mission-greeting">{displayName}さん、{greetingText}</h1>
+            </div>
+            <Link href="/dashboard" className="mission-nav-link">
+              ダッシュボードを見る
+            </Link>
+          </div>
         </header>
 
         {isLoadingQuestion ? (
