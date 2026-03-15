@@ -145,6 +145,90 @@ Use:
 - `DATABASE_URL` for the deployed app
 - `DIRECT_DATABASE_URL` only for admin tasks, migrations, or debugging workflows
 
+## Vercel Setup
+
+This repository is a multi-directory project and the actual Next.js app lives in `app/`.
+When creating the Vercel project, make sure the root directory points to `app`.
+
+### Recommended Vercel project settings
+
+- Framework Preset: `Next.js`
+- Root Directory: `app`
+- Install Command: leave default
+- Build Command: leave default unless you later need a custom Prisma step
+- Output Directory: leave default
+- Node.js version: use the Vercel default supported by Next.js 16, or pin a recent LTS version if your team prefers explicit control
+
+### Required Vercel environment variables
+
+Set these in the Vercel project settings.
+
+#### Production
+
+```env
+DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+```
+
+Optional:
+
+```env
+DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
+```
+
+#### Preview
+
+Preview deployments can usually use the same database at first:
+
+```env
+DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+```
+
+If you later want safer isolation, switch Preview to a separate Supabase project.
+
+### How to create the Vercel project
+
+1. Push this repository to GitHub.
+2. In Vercel, choose `Add New...` -> `Project`.
+3. Import the GitHub repository.
+4. In project configuration:
+   - set `Root Directory` to `app`
+   - confirm the framework is `Next.js`
+5. Open `Environment Variables`.
+6. Add `DATABASE_URL` for `Production`.
+7. Add `DATABASE_URL` for `Preview` if you want preview deployments to work.
+8. Optionally add `DIRECT_DATABASE_URL` for future migration or admin workflows.
+9. Start the first deployment.
+
+### After the first deployment
+
+Open the deployed site and verify:
+
+- the app loads without a server error
+- questions can be read from the database
+- creating users or saving answers works
+
+Then inspect the Vercel function logs if something fails.
+
+### Common Vercel mistakes
+
+- `Root Directory` was left at the repository root instead of `app`
+- `DATABASE_URL` was set to `5432` instead of `6543` for serverless runtime
+- the Supabase password was copied incorrectly
+- environment variables were added only for one environment and not for the one being deployed
+
+### Prisma on Vercel
+
+For this project, the application runtime only needs `DATABASE_URL`.
+For future schema deployments, run Prisma migrations in a controlled step and avoid using `prisma db push` against production.
+
+Typical workflow:
+
+1. create a migration locally
+2. commit the migration files
+3. apply them with `npx prisma migrate deploy` in the target environment
+
+If you later automate migrations during deployment, make sure that step uses a `5432` direct or session connection rather than the app's `6543` runtime connection
+
 ## Prisma Migration Workflow After Deployment
 
 This repository already contains Prisma schema and migrations:
