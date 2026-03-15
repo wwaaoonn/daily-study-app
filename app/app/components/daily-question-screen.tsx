@@ -30,7 +30,39 @@ type DailyQuestionScreenProps = {
   initialQuestionId?: string;
   initialExcludeQuestionId?: string;
   initialQuestion?: DailyQuestion | null;
+  initialSelectedChoice?: ChoiceKey | null;
+  initialAnswerResult?: AnswerResult | null;
+  initialEmailAnswerError?: string | null;
+  initialEmailAnswerNotice?: string | null;
 };
+
+function getEmailAnswerErrorMessage(error: string | null | undefined) {
+  if (error === "invalid-link") {
+    return "メールの回答リンクが無効か、すでに使用済みです。";
+  }
+
+  if (error === "question-not-found") {
+    return "問題を見つけられませんでした。";
+  }
+
+  if (error === "submit-failed") {
+    return "メールからの回答処理に失敗しました。時間をおいて再度お試しください。";
+  }
+
+  return null;
+}
+
+function isEmailAnswerLinkError(error: string | null | undefined) {
+  return error === "invalid-link";
+}
+
+function getEmailAnswerNoticeMessage(notice: string | null | undefined) {
+  if (notice === "already-answered") {
+    return "この問題はすでに回答済みだったため、保存済みの結果を表示しています。今回メールで押した選択肢は新しい回答としては反映されていません。";
+  }
+
+  return null;
+}
 
 function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
   if (choice === "A") return question.choice_a;
@@ -45,18 +77,30 @@ export function DailyQuestionScreen({
   initialQuestionId,
   initialExcludeQuestionId,
   initialQuestion = null,
+  initialSelectedChoice = null,
+  initialAnswerResult = null,
+  initialEmailAnswerError = null,
+  initialEmailAnswerNotice = null,
 }: DailyQuestionScreenProps) {
   const [question, setQuestion] = useState<DailyQuestion | null>(initialQuestion);
   const [questionMode, setQuestionMode] = useState<QuestionMode>(initialMode);
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(initialQuestion === null);
-  const [questionError, setQuestionError] = useState<string | null>(null);
-  const [selectedChoice, setSelectedChoice] = useState<ChoiceKey | null>(null);
-  const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
+  const [questionError, setQuestionError] = useState<string | null>(
+    getEmailAnswerErrorMessage(initialEmailAnswerError),
+  );
+  const [selectedChoice, setSelectedChoice] = useState<ChoiceKey | null>(initialSelectedChoice);
+  const [answerResult, setAnswerResult] = useState<AnswerResult | null>(initialAnswerResult);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isLoadingChallenge, setIsLoadingChallenge] = useState(false);
   const [challengeError, setChallengeError] = useState<string | null>(null);
+  const [emailAnswerNotice, setEmailAnswerNotice] = useState<string | null>(
+    getEmailAnswerNoticeMessage(initialEmailAnswerNotice),
+  );
   const [reloadKey, setReloadKey] = useState(0);
+  const isConsumedEmailAnswerLink = isEmailAnswerLinkError(initialEmailAnswerError);
+  const showChallengeOnlyErrorState =
+    !!questionError && isConsumedEmailAnswerLink && !answerResult;
 
   useEffect(() => {
     let isActive = true;
@@ -112,12 +156,13 @@ export function DailyQuestionScreen({
 
     async function loadQuestion() {
       setQuestionMode(initialMode);
-      setQuestionError(null);
+      setQuestionError(getEmailAnswerErrorMessage(initialEmailAnswerError));
       setSubmitError(null);
       setChallengeError(null);
+      setEmailAnswerNotice(getEmailAnswerNoticeMessage(initialEmailAnswerNotice));
       setIsLoadingChallenge(false);
-      setSelectedChoice(null);
-      setAnswerResult(null);
+      setSelectedChoice(initialSelectedChoice);
+      setAnswerResult(initialAnswerResult);
 
       if (reloadKey === 0 && initialQuestion) {
         setQuestion(initialQuestion);
@@ -160,7 +205,17 @@ export function DailyQuestionScreen({
     return () => {
       isActive = false;
     };
-  }, [initialExcludeQuestionId, initialMode, initialQuestion, initialQuestionId, reloadKey]);
+  }, [
+    initialAnswerResult,
+    initialEmailAnswerError,
+    initialEmailAnswerNotice,
+    initialExcludeQuestionId,
+    initialMode,
+    initialQuestion,
+    initialQuestionId,
+    initialSelectedChoice,
+    reloadKey,
+  ]);
 
   async function handleSubmit(choice: ChoiceKey) {
     if (!question || isSubmitting) {
@@ -205,6 +260,8 @@ export function DailyQuestionScreen({
 
     setIsLoadingChallenge(true);
     setChallengeError(null);
+    setQuestionError(null);
+    setEmailAnswerNotice(null);
 
     try {
       const searchParams = new URLSearchParams({
@@ -221,6 +278,8 @@ export function DailyQuestionScreen({
       const data = (await response.json()) as DailyQuestion;
       setQuestion(data);
       setQuestionMode("challenge");
+      setQuestionError(null);
+      setEmailAnswerNotice(null);
       setSubmitError(null);
       setSelectedChoice(null);
       setAnswerResult(null);
@@ -281,19 +340,44 @@ export function DailyQuestionScreen({
         {!isLoadingQuestion && questionError ? (
           <section className="mission-card">
             <p className="mission-copy">{questionError}</p>
-            <button
-              className="mission-secondary-button"
-              type="button"
-              onClick={() => setReloadKey((current) => current + 1)}
-            >
-              再読み込み
-            </button>
+            {!isConsumedEmailAnswerLink ? (
+              <button
+                className="mission-secondary-button"
+                type="button"
+                onClick={() => setReloadKey((current) => current + 1)}
+              >
+                再読み込み
+              </button>
+            ) : null}
           </section>
         ) : null}
 
         {!isLoadingQuestion && question ? (
           <>
-            {!isAnswered ? (
+            {emailAnswerNotice ? (
+              <section className="mission-card">
+                <p className="mission-copy">{emailAnswerNotice}</p>
+              </section>
+            ) : null}
+
+            {showChallengeOnlyErrorState ? (
+              <div className="mission-action-row">
+                <button
+                  className="mission-primary-button"
+                  type="button"
+                  onClick={() => void handleChallengeMore()}
+                  disabled={isLoadingChallenge}
+                >
+                  {isLoadingChallenge ? "次の問題を読み込み中..." : "別の問題にチャレンジ"}
+                </button>
+              </div>
+            ) : null}
+
+            {showChallengeOnlyErrorState && challengeError ? (
+              <p className="mission-error">{challengeError}</p>
+            ) : null}
+
+            {!isAnswered && !showChallengeOnlyErrorState ? (
               <>
                 <section className="mission-card mission-question-card">
                   <p className="mission-question">{question.prompt}</p>
