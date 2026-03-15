@@ -1,4 +1,5 @@
 import { DailyQuestionScreen } from "@/app/components/daily-question-screen";
+import { getDailyQuestion, getQuestionById, getRandomQuestion } from "@/app/lib/question";
 
 type HomePageProps = {
   searchParams?: Promise<{
@@ -13,12 +14,30 @@ export default async function Home({ searchParams }: HomePageProps) {
   const initialMode = params?.mode === "challenge" ? "challenge" : "daily";
   const initialQuestionId = params?.question_id;
   const initialExcludeQuestionId = params?.exclude_question_id;
+  const initialQuestion =
+    initialQuestionId
+      ? await getQuestionById(initialQuestionId)
+      : initialMode === "challenge"
+        ? (await getRandomQuestion(initialExcludeQuestionId)) ?? (await getDailyQuestion())
+        : await getDailyQuestion();
 
   return (
     <DailyQuestionScreen
       initialMode={initialMode}
       initialQuestionId={initialQuestionId}
       initialExcludeQuestionId={initialExcludeQuestionId}
+      initialQuestion={
+        initialQuestion
+          ? {
+              question_id: initialQuestion.id,
+              prompt: initialQuestion.prompt,
+              choice_a: initialQuestion.choice_a,
+              choice_b: initialQuestion.choice_b,
+              choice_c: initialQuestion.choice_c,
+              choice_d: initialQuestion.choice_d,
+            }
+          : null
+      }
     />
   );
 }

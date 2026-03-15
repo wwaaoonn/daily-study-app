@@ -29,6 +29,7 @@ type DailyQuestionScreenProps = {
   initialMode?: QuestionMode;
   initialQuestionId?: string;
   initialExcludeQuestionId?: string;
+  initialQuestion?: DailyQuestion | null;
 };
 
 function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
@@ -42,10 +43,11 @@ export function DailyQuestionScreen({
   initialMode = "daily",
   initialQuestionId,
   initialExcludeQuestionId,
+  initialQuestion = null,
 }: DailyQuestionScreenProps) {
-  const [question, setQuestion] = useState<DailyQuestion | null>(null);
-  const [questionMode, setQuestionMode] = useState<QuestionMode>("daily");
-  const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
+  const [question, setQuestion] = useState<DailyQuestion | null>(initialQuestion);
+  const [questionMode, setQuestionMode] = useState<QuestionMode>(initialMode);
+  const [isLoadingQuestion, setIsLoadingQuestion] = useState(initialQuestion === null);
   const [questionError, setQuestionError] = useState<string | null>(null);
   const [selectedChoice, setSelectedChoice] = useState<ChoiceKey | null>(null);
   const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
@@ -109,13 +111,20 @@ export function DailyQuestionScreen({
 
     async function loadQuestion() {
       setQuestionMode(initialMode);
-      setIsLoadingQuestion(true);
       setQuestionError(null);
       setSubmitError(null);
       setChallengeError(null);
       setIsLoadingChallenge(false);
       setSelectedChoice(null);
       setAnswerResult(null);
+
+      if (reloadKey === 0 && initialQuestion) {
+        setQuestion(initialQuestion);
+        setIsLoadingQuestion(false);
+        return;
+      }
+
+      setIsLoadingQuestion(true);
 
       try {
         const data =
@@ -150,7 +159,7 @@ export function DailyQuestionScreen({
     return () => {
       isActive = false;
     };
-  }, [initialExcludeQuestionId, initialMode, initialQuestionId, reloadKey]);
+  }, [initialExcludeQuestionId, initialMode, initialQuestion, initialQuestionId, reloadKey]);
 
   async function handleSubmit(choice: ChoiceKey) {
     if (!question || isSubmitting) {
