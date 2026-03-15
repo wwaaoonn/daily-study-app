@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f2f4ea;
+  --foreground: #252525;
+  --card: #fffdf7;
+  --accent: #57d400;
+  --accent-dark: #44a800;
+  --muted: #7d7d78;
+  --border: rgba(87, 212, 0, 0.12);
 }
 
 @theme inline {
@@ -12,15 +17,211 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+}
+
+.mission-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(125, 224, 54, 0.18), transparent 32%),
+    linear-gradient(180deg, #f7f9ef 0%, #eef2df 100%);
+  padding: 24px;
+}
+
+.mission-panel {
+  margin: 0 auto;
+  width: min(100%, 980px);
+  padding: 20px 16px 36px;
+}
+
+.mission-header {
+  margin-bottom: 24px;
+}
+
+.mission-eyebrow {
+  color: var(--accent-dark);
+  font-size: clamp(1.8rem, 3.8vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.mission-greeting {
+  margin-top: 20px;
+  font-size: clamp(1.2rem, 2.2vw, 1.95rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.mission-card {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: 0 22px 40px rgba(92, 108, 29, 0.08);
+  padding: 24px;
+}
+
+.mission-question-card {
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.mission-question {
+  font-size: clamp(1.65rem, 3vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1.35;
+}
+
+.mission-answer-section {
+  margin-top: 24px;
+}
+
+.mission-section-label,
+.mission-section-title,
+.mission-copy,
+.mission-footer-note,
+.mission-error,
+.mission-result-title {
+  letter-spacing: -0.02em;
+}
+
+.mission-section-label {
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+  font-weight: 500;
+}
+
+.mission-choice-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 22px;
+}
+
+.mission-choice-button,
+.mission-secondary-button {
+  border: none;
+  border-radius: 22px;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease,
+    opacity 140ms ease;
+}
+
+.mission-choice-button {
+  min-height: 78px;
+  background: var(--accent);
+  box-shadow: 0 16px 24px rgba(87, 212, 0, 0.24);
+  color: #ffffff;
+  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  padding: 18px 20px;
+}
+
+.mission-choice-button:hover:enabled,
+.mission-secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.mission-choice-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.mission-secondary-button {
+  margin-top: 16px;
+  background: #eef7d8;
+  color: var(--accent-dark);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 18px;
+}
+
+.mission-result-title {
+  color: var(--accent-dark);
+  font-size: clamp(1.9rem, 2.8vw, 2.7rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.mission-section-title {
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
+  font-weight: 800;
+}
+
+.mission-copy {
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.75;
+  margin-top: 14px;
+}
+
+.mission-highlight {
+  color: var(--accent-dark);
+}
+
+.mission-error {
+  color: #b42318;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 14px;
+}
+
+.mission-footer-note {
+  color: var(--muted);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-weight: 600;
+  margin-top: 28px;
+}
+
+@media (max-width: 720px) {
+  .mission-shell {
+    padding: 12px;
+  }
+
+  .mission-panel {
+    padding-inline: 8px;
+  }
+
+  .mission-greeting {
+    margin-top: 14px;
+  }
+
+  .mission-card {
+    border-radius: 20px;
+    padding: 18px 16px;
+  }
+
+  .mission-choice-grid {
+    gap: 14px;
+    grid-template-columns: 1fr;
+    margin-top: 18px;
+  }
+
+  .mission-choice-button {
+    min-height: 68px;
+  }
 }
