@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --schema app/prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "eslint",
-    "import:questions": "node ./scripts/import-questions-from-csv.cjs"
+    "import:questions": "node ./scripts/import-questions-from-csv.cjs",
+    "postinstall": "prisma generate --schema app/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
