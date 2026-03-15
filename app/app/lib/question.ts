@@ -9,14 +9,23 @@ export const questionSelect = {
   choice_d: true,
 } as const;
 
-export async function getRandomQuestion() {
-  const totalQuestions = await prisma.question.count();
+export async function getRandomQuestion(excludeQuestionId?: string) {
+  const where = excludeQuestionId
+    ? {
+        id: {
+          not: excludeQuestionId,
+        },
+      }
+    : undefined;
+
+  const totalQuestions = await prisma.question.count({ where });
 
   if (totalQuestions === 0) {
     return null;
   }
 
   return prisma.question.findFirst({
+    where,
     orderBy: { id: "asc" },
     skip: Math.floor(Math.random() * totalQuestions),
     select: questionSelect,

@@ -19,6 +19,8 @@ type AnswerResult = {
   explanation: string;
 };
 
+type QuestionMode = "daily" | "challenge";
+
 const choiceOrder: ChoiceKey[] = ["A", "B", "C", "D"];
 const displayName = "Takato";
 
@@ -31,21 +33,27 @@ function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
 
 export function DailyQuestionScreen() {
   const [question, setQuestion] = useState<DailyQuestion | null>(null);
+  const [questionMode, setQuestionMode] = useState<QuestionMode>("daily");
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
   const [questionError, setQuestionError] = useState<string | null>(null);
   const [selectedChoice, setSelectedChoice] = useState<ChoiceKey | null>(null);
   const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoadingChallenge, setIsLoadingChallenge] = useState(false);
+  const [challengeError, setChallengeError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let isActive = true;
 
     async function loadQuestion() {
+      setQuestionMode("daily");
       setIsLoadingQuestion(true);
       setQuestionError(null);
       setSubmitError(null);
+      setChallengeError(null);
+      setIsLoadingChallenge(false);
       setSelectedChoice(null);
       setAnswerResult(null);
 
@@ -122,18 +130,60 @@ export function DailyQuestionScreen() {
     }
   }
 
+  async function handleChallengeMore() {
+    if (!question || isLoadingChallenge) {
+      return;
+    }
+
+    setIsLoadingChallenge(true);
+    setChallengeError(null);
+
+    try {
+      const searchParams = new URLSearchParams({
+        exclude_question_id: question.question_id,
+      });
+      const response = await fetch(`/api/question/challenge?${searchParams.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("追加問題の取得に失敗しました。");
+      }
+
+      const data = (await response.json()) as DailyQuestion;
+      setQuestion(data);
+      setQuestionMode("challenge");
+      setSubmitError(null);
+      setSelectedChoice(null);
+      setAnswerResult(null);
+    } catch (error) {
+      console.error(error);
+      setChallengeError("別の問題を読み込めませんでした。時間をおいて再度お試しください。");
+    } finally {
+      setIsLoadingChallenge(false);
+    }
+  }
+
   const isAnswered = question !== null && answerResult !== null && selectedChoice !== null;
+  const eyebrowText = isAnswered
+    ? questionMode === "daily"
+      ? "英語ミッションの結果"
+      : "追加チャレンジの結果"
+    : questionMode === "daily"
+      ? "今日の英語ミッション"
+      : "追加チャレンジ";
+  const greetingText = isAnswered
+    ? "今回のチャレンジ結果はこちら！"
+    : questionMode === "daily"
+      ? "今日のクエストはこちら！"
+      : "次のクエストに挑戦しよう！";
 
   return (
     <main className="mission-shell">
       <section className="mission-panel">
         <header className="mission-header">
-          <p className="mission-eyebrow">
-            {isAnswered ? "英語ミッションの結果" : "今日の英語ミッション"}
-          </p>
-          <h1 className="mission-greeting">
-            {displayName}さん、{isAnswered ? "今回のチャレンジ結果はこちら！" : "今日のクエストはこちら！"}
-          </h1>
+          <p className="mission-eyebrow">{eyebrowText}</p>
+          <h1 className="mission-greeting">{displayName}さん、{greetingText}</h1>
         </header>
 
         {isLoadingQuestion ? (
@@ -219,6 +269,18 @@ export function DailyQuestionScreen() {
                     ? "連続チャレンジ1日目！このまま頑張ろう:)"
                     : "次の1問で挽回しよう。続けるほど力になります。"}
                 </p>
+
+                <div className="mission-action-row">
+                  <button
+                    className="mission-primary-button"
+                    type="button"
+                    onClick={() => void handleChallengeMore()}
+                    disabled={isLoadingChallenge}
+                  >
+                    {isLoadingChallenge ? "次の問題を読み込み中..." : "別の問題にチャレンジ"}
+                  </button>
+                </div>
+                {challengeError ? <p className="mission-error">{challengeError}</p> : null}
               </>
             ) : null}
           </>

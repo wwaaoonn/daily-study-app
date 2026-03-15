@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 
 import { getRandomQuestion } from "@/app/lib/question";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const question = await getRandomQuestion();
+    const { searchParams } = new URL(request.url);
+    const excludeQuestionId = searchParams.get("exclude_question_id")?.trim() || undefined;
+    const question = await getRandomQuestion(excludeQuestionId);
 
     if (!question) {
       return NextResponse.json(
-        { error: "No questions found." },
+        { error: "No challenge questions found." },
         { status: 404 },
       );
     }
