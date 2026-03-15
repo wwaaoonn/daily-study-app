@@ -2,11 +2,13 @@
 
 ## 1. Get Daily Question
 
-Return today's question for the user.
+Return the daily question. The same date always returns the same question.
 
 ### Endpoint
 
 GET /api/question/daily
+
+The question is fixed per date based on the Asia/Tokyo calendar day.
 
 ### Response
 
@@ -48,7 +50,7 @@ POST /api/answer
 }
 ```
 
-### Get Challenge Question
+### 3. Get Challenge Question
 
 Return a random question.
 

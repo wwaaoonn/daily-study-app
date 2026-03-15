@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "prisma/config";
+import { defineConfig } from "./app/node_modules/prisma/config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,13 +45,13 @@ function loadEnvFile(filePath: string) {
   }
 }
 
-loadEnvFile(path.resolve(__dirname, "../.env.local"));
-loadEnvFile(path.resolve(__dirname, ".env"));
+loadEnvFile(path.resolve(__dirname, "app/.env.local"));
+loadEnvFile(path.resolve(__dirname, "app/app/.env"));
 
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  schema: "app/app/prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations",
+    path: "app/app/prisma/migrations",
   },
   datasource: {
     url: process.env["DATABASE_URL"],
