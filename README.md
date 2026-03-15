@@ -15,6 +15,14 @@ They answer the question through a web interface and can challenge more question
 - Challenge more questions
 - Learning progress dashboard
 
+## Current dashboard metrics
+
+- Total attempts
+- Correct rate
+- Category mix
+- Current streak / longest streak
+- Answer activity calendar
+
 ## Tech Stack (planned)
 
 - Next.js

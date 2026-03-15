@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type ChoiceKey = "A" | "B" | "C" | "D";
@@ -24,6 +25,12 @@ type QuestionMode = "daily" | "challenge";
 const choiceOrder: ChoiceKey[] = ["A", "B", "C", "D"];
 const displayName = "Takato";
 
+type DailyQuestionScreenProps = {
+  initialMode?: QuestionMode;
+  initialQuestionId?: string;
+  initialExcludeQuestionId?: string;
+};
+
 function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
   if (choice === "A") return question.choice_a;
   if (choice === "B") return question.choice_b;
@@ -31,7 +38,11 @@ function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
   return question.choice_d;
 }
 
-export function DailyQuestionScreen() {
+export function DailyQuestionScreen({
+  initialMode = "daily",
+  initialQuestionId,
+  initialExcludeQuestionId,
+}: DailyQuestionScreenProps) {
   const [question, setQuestion] = useState<DailyQuestion | null>(null);
   const [questionMode, setQuestionMode] = useState<QuestionMode>("daily");
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
@@ -47,8 +58,57 @@ export function DailyQuestionScreen() {
   useEffect(() => {
     let isActive = true;
 
+    async function loadDailyQuestion() {
+      const response = await fetch("/api/question/daily", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("問題の取得に失敗しました。");
+      }
+
+      return (await response.json()) as DailyQuestion;
+    }
+
+    async function loadQuestionById(questionId: string) {
+      const searchParams = new URLSearchParams({
+        question_id: questionId,
+      });
+      const response = await fetch(`/api/question?${searchParams.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("指定された問題の取得に失敗しました。");
+      }
+
+      return (await response.json()) as DailyQuestion;
+    }
+
+    async function loadChallengeQuestion(excludeQuestionId?: string) {
+      const searchParams = new URLSearchParams();
+
+      if (excludeQuestionId) {
+        searchParams.set("exclude_question_id", excludeQuestionId);
+      }
+
+      const query = searchParams.toString();
+      const response = await fetch(
+        query ? `/api/question/challenge?${query}` : "/api/question/challenge",
+        {
+          cache: "no-store",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("追加問題の取得に失敗しました。");
+      }
+
+      return (await response.json()) as DailyQuestion;
+    }
+
     async function loadQuestion() {
-      setQuestionMode("daily");
+      setQuestionMode(initialMode);
       setIsLoadingQuestion(true);
       setQuestionError(null);
       setSubmitError(null);
@@ -58,21 +118,19 @@ export function DailyQuestionScreen() {
       setAnswerResult(null);
 
       try {
-        const response = await fetch("/api/question/daily", {
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error("問題の取得に失敗しました。");
-        }
-
-        const data = (await response.json()) as DailyQuestion;
+        const data =
+          initialQuestionId
+            ? await loadQuestionById(initialQuestionId)
+            : initialMode === "challenge"
+              ? await loadChallengeQuestion(initialExcludeQuestionId).catch(() => loadDailyQuestion())
+              : await loadDailyQuestion();
 
         if (!isActive) {
           return;
         }
 
         setQuestion(data);
+        setQuestionMode(initialMode);
       } catch (error) {
         if (!isActive) {
           return;
@@ -92,7 +150,7 @@ export function DailyQuestionScreen() {
     return () => {
       isActive = false;
     };
-  }, [reloadKey]);
+  }, [initialExcludeQuestionId, initialMode, initialQuestionId, reloadKey]);
 
   async function handleSubmit(choice: ChoiceKey) {
     if (!question || isSubmitting) {
@@ -177,13 +235,24 @@ export function DailyQuestionScreen() {
     : questionMode === "daily"
       ? "今日のクエストはこちら！"
       : "次のクエストに挑戦しよう！";
+  const dashboardHref =
+    question && !isAnswered
+      ? `/dashboard?return_mode=${questionMode}&return_question_id=${question.question_id}`
+      : "/dashboard";
 
   return (
     <main className="mission-shell">
       <section className="mission-panel">
         <header className="mission-header">
-          <p className="mission-eyebrow">{eyebrowText}</p>
-          <h1 className="mission-greeting">{displayName}さん、{greetingText}</h1>
+          <div className="mission-header-row">
+            <div>
+              <p className="mission-eyebrow">{eyebrowText}</p>
+              <h1 className="mission-greeting">{displayName}さん、{greetingText}</h1>
+            </div>
+            <Link href={dashboardHref} className="mission-nav-link">
+              ダッシュボードを見る
+            </Link>
+          </div>
         </header>
 
         {isLoadingQuestion ? (
