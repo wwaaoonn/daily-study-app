@@ -96,3 +96,5 @@ These files will need to stop depending on the guest account model:
 - `VerificationToken.identifier` should store the email address
 - `Session.session_token` should be stored in an HTTP-only cookie
 - `email_verified_at` can be set when the magic link is successfully consumed
+- `email` is the unique key for `User`, so signing in with the same email reuses the same learning history
+- during development and QA, use separate email addresses if you want to verify a clean dashboard state

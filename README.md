@@ -47,3 +47,10 @@ MAIL_FROM="Budledge <noreply@mail.budledge.dev>"
 ```
 
 For production, set `APP_BASE_URL` to `https://budledge.dev`.
+
+## Authentication Behavior
+
+- The app uses email-link authentication.
+- `User.email` is treated as the unique account key.
+- Signing in with the same email address resumes the same learning history and dashboard data.
+- For testing a clean first-time experience, use a different email address from existing test accounts.
