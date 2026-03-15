@@ -1,14 +1,19 @@
 # System Architecture
 
+This diagram shows the high-level architecture of the Daily Study App.
+
 ```mermaid
 flowchart TD
 
-User --> Email
+User["User"] -->|opens email link| WebApp["Web Application (Next.js)"]
 
-Email --> WebApp
+Scheduler["Daily Scheduler (Cron Job)"] -->|trigger daily question| API["Backend API"]
 
-WebApp --> API
+API -->|send email| EmailService["Email Service"]
 
-API --> Database
+EmailService -->|deliver email| User
 
-Scheduler --> Email
+WebApp -->|submit answer| API
+
+API -->|read/write data| Database["Database (PostgreSQL)"]
+
