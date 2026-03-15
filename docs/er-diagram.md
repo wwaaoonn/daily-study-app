@@ -1,22 +1,45 @@
-Users
-- id
-- email
-- created_at
+# ER Diagram
 
-Questions
-- id
-- prompt
-- choice_a
-- choice_b
-- choice_c
-- choice_d
-- correct_choice
-- explanation
+```mermaid
+erDiagram
 
-Answers
-- id
-- user_id
-- question_id
-- selected_choice
-- is_correct
-- answered_at
+USER ||--o{ ANSWER : submits
+QUESTION ||--o{ ANSWER : answered_in
+USER ||--o{ DAILY_DELIVERY : receives
+QUESTION ||--o{ DAILY_DELIVERY : delivered
+
+USER {
+ uuid id
+ string email
+ datetime created_at
+}
+
+QUESTION {
+ uuid id
+ text prompt
+ text choice_a
+ text choice_b
+ text choice_c
+ text choice_d
+ string correct_choice
+ text explanation
+ string category
+ int difficulty
+}
+
+ANSWER {
+ uuid id
+ uuid user_id
+ uuid question_id
+ string selected_choice
+ boolean is_correct
+ datetime answered_at
+}
+
+DAILY_DELIVERY {
+ uuid id
+ uuid user_id
+ uuid question_id
+ datetime sent_at
+}
+
