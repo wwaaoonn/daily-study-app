@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String          @id @default(uuid())
+  email            String          @unique
+  created_at       DateTime        @default(now())
+  answers          Answer[]
+  daily_deliveries DailyDelivery[]
+}
+
+model Question {
+  id               String          @id @default(uuid())
+  prompt           String
+  choice_a         String
+  choice_b         String
+  choice_c         String
+  choice_d         String
+  correct_choice   String
+  explanation      String
+  category         String
+  difficulty       Int
+  answers          Answer[]
+  daily_deliveries DailyDelivery[]
+}
+
+model Answer {
+  id              String    @id @default(uuid())
+  user_id         String
+  question_id     String
+  selected_choice String
+  is_correct      Boolean
+  answered_at     DateTime  @default(now())
+
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  question        Question  @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([question_id])
+}
+
+model DailyDelivery {
+  id          String    @id @default(uuid())
+  user_id     String
+  question_id String
+  sent_at     DateTime  @default(now())
+
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  question    Question  @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([question_id])
+}
