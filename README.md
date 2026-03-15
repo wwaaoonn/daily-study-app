@@ -4,7 +4,7 @@
 
 An app that helps users study something every day through a daily email challenge.
 
-[https://daily-study-app-teal.vercel.app](https://daily-study-app-teal.vercel.app)
+[https://daily-study-app-teal.vercel.app](https://budledge.dev/)
 
 ## Concept
 
