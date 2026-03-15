@@ -50,52 +50,52 @@ button {
 
 .mission-panel {
   margin: 0 auto;
-  width: min(100%, 1100px);
-  padding: 24px 16px 40px;
+  width: min(100%, 980px);
+  padding: 20px 16px 36px;
 }
 
 .mission-header {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .mission-eyebrow {
   color: var(--accent-dark);
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: clamp(1.8rem, 3.8vw, 2.9rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.05;
 }
 
 .mission-greeting {
-  margin-top: 28px;
-  font-size: clamp(1.65rem, 3vw, 3rem);
+  margin-top: 20px;
+  font-size: clamp(1.2rem, 2.2vw, 1.95rem);
   font-weight: 500;
   letter-spacing: -0.03em;
 }
 
 .mission-card {
-  margin-top: 24px;
+  margin-top: 20px;
   border: 1px solid var(--border);
-  border-radius: 28px;
+  border-radius: 24px;
   background: var(--card);
   box-shadow: 0 22px 40px rgba(92, 108, 29, 0.08);
-  padding: 30px 28px;
+  padding: 24px;
 }
 
 .mission-question-card {
-  padding-top: 34px;
-  padding-bottom: 34px;
+  padding-top: 28px;
+  padding-bottom: 28px;
 }
 
 .mission-question {
-  font-size: clamp(2rem, 4vw, 4rem);
+  font-size: clamp(1.65rem, 3vw, 2.9rem);
   font-weight: 800;
   letter-spacing: -0.05em;
-  line-height: 1.25;
+  line-height: 1.35;
 }
 
 .mission-answer-section {
-  margin-top: 28px;
+  margin-top: 24px;
 }
 
 .mission-section-label,
@@ -108,15 +108,15 @@ button {
 }
 
 .mission-section-label {
-  font-size: clamp(1.7rem, 2.4vw, 2.6rem);
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
   font-weight: 500;
 }
 
 .mission-choice-grid {
   display: grid;
-  gap: 24px;
+  gap: 18px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 36px;
+  margin-top: 22px;
 }
 
 .mission-choice-button,
@@ -132,14 +132,14 @@ button {
 }
 
 .mission-choice-button {
-  min-height: 104px;
+  min-height: 78px;
   background: var(--accent);
   box-shadow: 0 16px 24px rgba(87, 212, 0, 0.24);
   color: #ffffff;
-  font-size: clamp(1.6rem, 2vw, 2.6rem);
+  font-size: clamp(1.1rem, 1.6vw, 1.45rem);
   font-weight: 800;
   letter-spacing: -0.04em;
-  padding: 24px;
+  padding: 18px 20px;
 }
 
 .mission-choice-button:hover:enabled,
@@ -153,30 +153,30 @@ button {
 }
 
 .mission-secondary-button {
-  margin-top: 18px;
+  margin-top: 16px;
   background: #eef7d8;
   color: var(--accent-dark);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   padding: 12px 18px;
 }
 
 .mission-result-title {
   color: var(--accent-dark);
-  font-size: clamp(2.6rem, 4vw, 4.2rem);
+  font-size: clamp(1.9rem, 2.8vw, 2.7rem);
   font-weight: 800;
   line-height: 1.1;
 }
 
 .mission-section-title {
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
   font-weight: 800;
 }
 
 .mission-copy {
-  font-size: clamp(1.35rem, 2vw, 2.2rem);
-  line-height: 1.7;
-  margin-top: 18px;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.75;
+  margin-top: 14px;
 }
 
 .mission-highlight {
@@ -185,16 +185,16 @@ button {
 
 .mission-error {
   color: #b42318;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .mission-footer-note {
   color: var(--muted);
-  font-size: clamp(1.5rem, 2.1vw, 2.2rem);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
   font-weight: 600;
-  margin-top: 36px;
+  margin-top: 28px;
 }
 
 @media (max-width: 720px) {
@@ -207,21 +207,21 @@ button {
   }
 
   .mission-greeting {
-    margin-top: 18px;
+    margin-top: 14px;
   }
 
   .mission-card {
-    border-radius: 24px;
-    padding: 22px 18px;
+    border-radius: 20px;
+    padding: 18px 16px;
   }
 
   .mission-choice-grid {
-    gap: 16px;
+    gap: 14px;
     grid-template-columns: 1fr;
-    margin-top: 24px;
+    margin-top: 18px;
   }
 
   .mission-choice-button {
-    min-height: 88px;
+    min-height: 68px;
   }
 }
