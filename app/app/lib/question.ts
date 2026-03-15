@@ -9,6 +9,27 @@ export const questionSelect = {
   choice_d: true,
 } as const;
 
+export function getDateKeyInJst(date: Date) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  return formatter.format(date);
+}
+
+export function getJstDayRange(date = new Date()) {
+  const dateKey = getDateKeyInJst(date);
+  const start = new Date(`${dateKey}T00:00:00+09:00`);
+  const end = new Date(start);
+
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return { start, end };
+}
+
 export async function getRandomQuestion(excludeQuestionId?: string) {
   const where = excludeQuestionId
     ? {
@@ -30,17 +51,6 @@ export async function getRandomQuestion(excludeQuestionId?: string) {
     skip: Math.floor(Math.random() * totalQuestions),
     select: questionSelect,
   });
-}
-
-function getDateKeyInJst(date: Date) {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-  return formatter.format(date);
 }
 
 function hashString(value: string) {

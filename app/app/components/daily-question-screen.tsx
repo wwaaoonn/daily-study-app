@@ -25,6 +25,11 @@ type QuestionMode = "daily" | "challenge";
 const choiceOrder: ChoiceKey[] = ["A", "B", "C", "D"];
 const displayName = "Takato";
 
+type DailyQuestionScreenProps = {
+  initialMode?: QuestionMode;
+  initialExcludeQuestionId?: string;
+};
+
 function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
   if (choice === "A") return question.choice_a;
   if (choice === "B") return question.choice_b;
@@ -32,7 +37,10 @@ function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
   return question.choice_d;
 }
 
-export function DailyQuestionScreen() {
+export function DailyQuestionScreen({
+  initialMode = "daily",
+  initialExcludeQuestionId,
+}: DailyQuestionScreenProps) {
   const [question, setQuestion] = useState<DailyQuestion | null>(null);
   const [questionMode, setQuestionMode] = useState<QuestionMode>("daily");
   const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
@@ -48,8 +56,42 @@ export function DailyQuestionScreen() {
   useEffect(() => {
     let isActive = true;
 
+    async function loadDailyQuestion() {
+      const response = await fetch("/api/question/daily", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("問題の取得に失敗しました。");
+      }
+
+      return (await response.json()) as DailyQuestion;
+    }
+
+    async function loadChallengeQuestion(excludeQuestionId?: string) {
+      const searchParams = new URLSearchParams();
+
+      if (excludeQuestionId) {
+        searchParams.set("exclude_question_id", excludeQuestionId);
+      }
+
+      const query = searchParams.toString();
+      const response = await fetch(
+        query ? `/api/question/challenge?${query}` : "/api/question/challenge",
+        {
+          cache: "no-store",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("追加問題の取得に失敗しました。");
+      }
+
+      return (await response.json()) as DailyQuestion;
+    }
+
     async function loadQuestion() {
-      setQuestionMode("daily");
+      setQuestionMode(initialMode);
       setIsLoadingQuestion(true);
       setQuestionError(null);
       setSubmitError(null);
@@ -59,21 +101,17 @@ export function DailyQuestionScreen() {
       setAnswerResult(null);
 
       try {
-        const response = await fetch("/api/question/daily", {
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error("問題の取得に失敗しました。");
-        }
-
-        const data = (await response.json()) as DailyQuestion;
+        const data =
+          initialMode === "challenge"
+            ? await loadChallengeQuestion(initialExcludeQuestionId).catch(() => loadDailyQuestion())
+            : await loadDailyQuestion();
 
         if (!isActive) {
           return;
         }
 
         setQuestion(data);
+        setQuestionMode(initialMode === "challenge" ? "challenge" : "daily");
       } catch (error) {
         if (!isActive) {
           return;
@@ -93,7 +131,7 @@ export function DailyQuestionScreen() {
     return () => {
       isActive = false;
     };
-  }, [reloadKey]);
+  }, [initialExcludeQuestionId, initialMode, reloadKey]);
 
   async function handleSubmit(choice: ChoiceKey) {
     if (!question || isSubmitting) {

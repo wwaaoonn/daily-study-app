@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getDashboardStats } from "@/app/lib/dashboard";
+import { getQuestionReturnHref } from "@/app/lib/navigation";
 
 export const metadata = {
   title: "Dashboard | Daily Study App",
@@ -71,7 +72,10 @@ function getCalendarTone(count: number) {
 }
 
 export default async function DashboardPage() {
-  const stats = await getDashboardStats();
+  const [stats, questionReturnHref] = await Promise.all([
+    getDashboardStats(),
+    getQuestionReturnHref(),
+  ]);
   const calendarWeeks = buildCalendar(stats.answeredDates);
   const topCategory = stats.categoryBreakdown[0] ?? null;
   const focusCategory =
@@ -92,7 +96,7 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="dashboard-header-actions">
-            <Link href="/" className="dashboard-secondary-link">
+            <Link href={questionReturnHref} className="dashboard-secondary-link">
               問題に戻る
             </Link>
           </div>
