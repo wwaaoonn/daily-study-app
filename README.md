@@ -1,6 +1,10 @@
 # Daily Study App
 
+![Daily Study App screenshot](docs/images/app-top.png)
+
 An app that helps users study something every day through a daily email challenge.
+
+[https://daily-study-app-teal.vercel.app](https://daily-study-app-teal.vercel.app)
 
 ## Concept
 
