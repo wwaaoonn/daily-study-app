@@ -9,6 +9,7 @@ export const metadata = {
 };
 
 const weekdayLabels = ["日", "月", "火", "水", "木", "金", "土"];
+const calendarWindowDays = 70;
 
 function formatDateLabel(dateKey: string) {
   const date = new Date(`${dateKey}T00:00:00+09:00`);
@@ -29,6 +30,15 @@ function getDayNumber(dateKey: string) {
   }).format(date);
 }
 
+function getMonthLabel(dateKey: string) {
+  const date = new Date(`${dateKey}T00:00:00+09:00`);
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "long",
+  }).format(date);
+}
+
 function getDateKeyInJst(date: Date) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Tokyo",
@@ -41,18 +51,28 @@ function getDateKeyInJst(date: Date) {
 function buildCalendar(answeredDates: Array<{ date: string; count: number }>) {
   const activityMap = new Map(answeredDates.map((entry) => [entry.date, entry.count]));
   const today = new Date();
-  const cells: Array<{ dateKey: string; count: number; label: string }> = [];
+  const cells: Array<{
+    dateKey: string;
+    count: number;
+    label: string;
+    monthLabel: string | null;
+  }> = [];
+  let previousMonthLabel: string | null = null;
 
-  for (let offset = 69; offset >= 0; offset -= 1) {
+  for (let offset = calendarWindowDays - 1; offset >= 0; offset -= 1) {
     const date = new Date(today);
     date.setUTCDate(date.getUTCDate() - offset);
     const dateKey = getDateKeyInJst(date);
+    const monthLabel = getMonthLabel(dateKey);
 
     cells.push({
       dateKey,
       count: activityMap.get(dateKey) ?? 0,
       label: formatDateLabel(dateKey),
+      monthLabel: monthLabel !== previousMonthLabel ? monthLabel : null,
     });
+
+    previousMonthLabel = monthLabel;
   }
 
   const weeks: typeof cells[] = [];
@@ -182,7 +202,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <p className="dashboard-card-eyebrow">Consistency</p>
                 <h2 className="dashboard-card-title">回答カレンダー</h2>
               </div>
-              <p className="dashboard-card-caption">過去70日</p>
+              <p className="dashboard-card-caption">過去50日</p>
             </div>
 
             <div className="dashboard-calendar-wrap">
@@ -201,6 +221,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                         title={`${day.label}: ${day.count}問`}
                         aria-label={`${day.label}に${day.count}問回答`}
                       >
+                        {day.monthLabel ? (
+                          <span className="dashboard-calendar-month">{day.monthLabel}</span>
+                        ) : null}
                         <span>{getDayNumber(day.dateKey)}</span>
                       </div>
                     ))}
