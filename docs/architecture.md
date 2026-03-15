@@ -16,4 +16,4 @@ EmailService -->|deliver email| User
 WebApp -->|submit answer| API
 
 API -->|read/write data| Database["Database (PostgreSQL)"]
-
+```

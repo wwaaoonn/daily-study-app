@@ -42,4 +42,4 @@ DAILY_DELIVERY {
  uuid question_id
  datetime sent_at
 }
-
+```
