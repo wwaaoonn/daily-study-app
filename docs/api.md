@@ -58,9 +58,15 @@ Return a random question.
 
 GET /api/question/challenge
 
+### Query Parameters
+
+- `exclude_question_id` (optional): Exclude the currently displayed question from the random selection.
+
 ### Response
 
 Same as daily question.
+
+If `exclude_question_id` is provided and another question exists, the API returns a different question.
 
 ```json
 {

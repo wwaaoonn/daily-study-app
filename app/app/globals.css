@@ -120,7 +120,8 @@ button {
 }
 
 .mission-choice-button,
-.mission-secondary-button {
+.mission-secondary-button,
+.mission-primary-button {
   border: none;
   border-radius: 22px;
   cursor: pointer;
@@ -143,7 +144,8 @@ button {
 }
 
 .mission-choice-button:hover:enabled,
-.mission-secondary-button:hover {
+.mission-secondary-button:hover,
+.mission-primary-button:hover:enabled {
   transform: translateY(-1px);
 }
 
@@ -159,6 +161,24 @@ button {
   font-size: 0.95rem;
   font-weight: 700;
   padding: 12px 18px;
+}
+
+.mission-action-row {
+  margin-top: 20px;
+}
+
+.mission-primary-button {
+  background: var(--foreground);
+  box-shadow: 0 16px 24px rgba(37, 37, 37, 0.14);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 14px 22px;
+}
+
+.mission-primary-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .mission-result-title {

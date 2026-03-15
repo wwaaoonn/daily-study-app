@@ -10,10 +10,12 @@
 - Correct / Incorrect
 - Correct answer
 - Explanation
+- Challenge button
 
 ## 3 Challenge More
 
-- Another question
+- User taps a button after checking the result
+- Show another random question by using `GET /api/question/challenge`
 
 ## 4 Dashboard
 
