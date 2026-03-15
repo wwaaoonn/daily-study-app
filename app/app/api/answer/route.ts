@@ -1,11 +1,7 @@
-import { randomUUID } from "node:crypto";
-
 import { NextResponse } from "next/server";
 
+import { ChoiceKey, VALID_CHOICES, createAnswer } from "@/app/lib/answer";
 import { requireCurrentUser } from "@/app/lib/auth";
-import { prisma } from "@/app/lib/prisma";
-
-const VALID_CHOICES = new Set(["A", "B", "C", "D"]);
 
 type SubmitAnswerRequest = {
   question_id?: string;
@@ -25,26 +21,10 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!VALID_CHOICES.has(selectedChoice)) {
+    if (!selectedChoice || !VALID_CHOICES.has(selectedChoice as "A" | "B" | "C" | "D")) {
       return NextResponse.json(
         { error: "selected_choice must be one of A, B, C, or D." },
         { status: 400 },
-      );
-    }
-
-    const question = await prisma.question.findUnique({
-      where: { id: questionId },
-      select: {
-        id: true,
-        correct_choice: true,
-        explanation: true,
-      },
-    });
-
-    if (!question) {
-      return NextResponse.json(
-        { error: "Question not found." },
-        { status: 404 },
       );
     }
 
@@ -59,22 +39,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const isCorrect = question.correct_choice === selectedChoice;
-
-    await prisma.answer.create({
-      data: {
-        id: randomUUID(),
-        user_id: user.id,
-        question_id: question.id,
-        selected_choice: selectedChoice,
-        is_correct: isCorrect,
-      },
+    const result = await createAnswer({
+      userId: user.id,
+      questionId,
+      selectedChoice: selectedChoice as ChoiceKey,
     });
 
+    if (!result) {
+      return NextResponse.json(
+        { error: "Question not found." },
+        { status: 404 },
+      );
+    }
+
     return NextResponse.json({
-      correct: isCorrect,
-      correct_choice: question.correct_choice,
-      explanation: question.explanation,
+      correct: result.correct,
+      correct_choice: result.correctChoice,
+      explanation: result.explanation,
     });
   } catch (error) {
     console.error("Failed to submit answer:", error);

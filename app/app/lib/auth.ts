@@ -20,17 +20,36 @@ function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
-function getBaseUrl() {
+export function getBaseUrl() {
   return process.env.APP_BASE_URL ?? "http://localhost:3000";
+}
+
+export function normalizeCallbackPath(callbackPath?: string | null) {
+  if (!callbackPath) {
+    return "/";
+  }
+
+  const trimmedPath = callbackPath.trim();
+
+  if (!trimmedPath.startsWith("/") || trimmedPath.startsWith("//")) {
+    return "/";
+  }
+
+  return trimmedPath;
 }
 
 export function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export async function createMagicLink(input: { email: string; name?: string | null }) {
+export async function createMagicLink(input: {
+  email: string;
+  name?: string | null;
+  callbackPath?: string | null;
+}) {
   const email = normalizeEmail(input.email);
   const name = input.name?.trim() || null;
+  const callbackPath = normalizeCallbackPath(input.callbackPath);
   const rawToken = randomUUID();
   const now = new Date();
   const expiresAt = addDuration(now, MAGIC_LINK_TTL_MINUTES * 60 * 1000);
@@ -65,6 +84,7 @@ export async function createMagicLink(input: { email: string; name?: string | nu
 
   const magicLink = new URL("/api/auth/verify", getBaseUrl());
   magicLink.searchParams.set("token", rawToken);
+  magicLink.searchParams.set("next", callbackPath);
 
   return {
     email,

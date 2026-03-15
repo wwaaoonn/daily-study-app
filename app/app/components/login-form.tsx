@@ -4,6 +4,7 @@ import { useState } from "react";
 
 type LoginFormProps = {
   initialError?: string | null;
+  callbackPath?: string;
 };
 
 type RequestLinkResponse = {
@@ -28,7 +29,7 @@ function getErrorMessage(error: string | null | undefined) {
   return null;
 }
 
-export function LoginForm({ initialError }: LoginFormProps) {
+export function LoginForm({ initialError, callbackPath = "/" }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "sent">("idle");
@@ -50,6 +51,7 @@ export function LoginForm({ initialError }: LoginFormProps) {
         body: JSON.stringify({
           email,
           name,
+          callback_path: callbackPath,
         }),
       });
       const data = (await response.json()) as RequestLinkResponse;

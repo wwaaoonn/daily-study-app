@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/app/components/login-form";
-import { getCurrentUser } from "@/app/lib/auth";
+import { getCurrentUser, normalizeCallbackPath } from "@/app/lib/auth";
 
 export const metadata = {
   title: "Sign In | Daily Study App",
@@ -11,21 +11,24 @@ export const metadata = {
 type LoginPageProps = {
   searchParams?: Promise<{
     error?: string;
+    next?: string;
   }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = searchParams ? await searchParams : undefined;
   const user = await getCurrentUser();
 
   if (user) {
-    redirect("/");
+    redirect(normalizeCallbackPath(params?.next));
   }
-
-  const params = searchParams ? await searchParams : undefined;
 
   return (
     <main className="auth-shell">
-      <LoginForm initialError={params?.error ?? null} />
+      <LoginForm
+        initialError={params?.error ?? null}
+        callbackPath={normalizeCallbackPath(params?.next)}
+      />
     </main>
   );
 }

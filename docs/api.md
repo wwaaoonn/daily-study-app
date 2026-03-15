@@ -37,6 +37,8 @@ GET /api/auth/verify?token=...
 
 Redirect to the app top page after the session cookie is set.
 
+If `next=/some/path` is included, the user is redirected there after sign-in.
+
 ## 3. Get Current Session
 
 Return the current signed-in user.
@@ -188,3 +190,52 @@ GET /api/dashboard
   ]
 }
 ```
+
+## 9. Trigger Daily Question Emails
+
+Send the daily question email to all verified users.
+
+### Endpoint
+
+GET /api/cron/daily-question
+
+Optional query parameters:
+
+- `question_id`: send a specific question instead of the JST daily question
+- `force_resend=true`: resend even if today's `DailyDelivery` is already marked as `sent`
+
+### Headers
+
+`Authorization: Bearer <CRON_SECRET>`
+
+### Response
+
+```json
+{
+  "ok": true,
+  "questionId": "uuid",
+  "attemptedCount": 12,
+  "sentCount": 10,
+  "skippedCount": 2,
+  "failureCount": 0,
+  "failures": []
+}
+```
+
+## 10. Submit Answer From Email
+
+Consume a single-use email answer link, create a session, save the answer, and redirect to the result page.
+
+### Endpoint
+
+GET /api/email-answer?token=...&choice=A
+
+### Query Parameters
+
+- `token`: single-use answer token embedded in the daily email
+- `choice`: one of `A`, `B`, `C`, `D`
+
+### Behavior
+
+- On first use, the token is consumed, the answer is saved, and the user is redirected to `/?question_id=...&answer_id=...`
+- If the same token is opened again later, the user is redirected with `email_answer_error=invalid-link`

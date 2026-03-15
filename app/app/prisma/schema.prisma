@@ -54,16 +54,22 @@ model Answer {
 }
 
 model DailyDelivery {
-  id          String    @id @default(uuid())
-  user_id     String
-  question_id String
-  sent_at     DateTime  @default(now())
+  id            String    @id @default(uuid())
+  user_id       String
+  question_id   String
+  delivery_date String
+  status        String    @default("pending")
+  error_message String?
+  answer_token_hash String? @unique
+  sent_at       DateTime  @default(now())
 
-  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  question    Question  @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  question      Question  @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([question_id])
+  @@index([delivery_date, status])
+  @@unique([user_id, delivery_date])
 }
 
 model Session {

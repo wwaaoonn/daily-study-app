@@ -6,6 +6,7 @@ import { sendMagicLinkEmail } from "@/app/lib/email";
 type RequestLinkBody = {
   email?: string;
   name?: string;
+  callback_path?: string;
 };
 
 export async function POST(request: Request) {
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as RequestLinkBody;
     const email = body.email?.trim() ?? "";
     const name = body.name?.trim() || undefined;
+    const callbackPath = body.callback_path?.trim() || undefined;
 
     if (!email) {
       return NextResponse.json(
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { magicLink } = await createMagicLink({ email, name });
+    const { magicLink } = await createMagicLink({ email, name, callbackPath });
 
     if (process.env.RESEND_API_KEY && process.env.MAIL_FROM) {
       await sendMagicLinkEmail({
