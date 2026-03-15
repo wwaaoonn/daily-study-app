@@ -1,6 +1,79 @@
 # Daily Study App API
 
-## 1. Get Daily Question
+## 1. Request Magic Link
+
+Send a sign-in email to the user.
+
+### Endpoint
+
+POST /api/auth/request-link
+
+### Request
+
+```json
+{
+  "email": "user@example.com",
+  "name": "Takato"
+}
+```
+
+### Response
+
+```json
+{
+  "ok": true
+}
+```
+
+## 2. Verify Magic Link
+
+Verify the one-time token and create a session.
+
+### Endpoint
+
+GET /api/auth/verify?token=...
+
+### Response
+
+Redirect to the app top page after the session cookie is set.
+
+## 3. Get Current Session
+
+Return the current signed-in user.
+
+### Endpoint
+
+GET /api/auth/session
+
+### Response
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "Takato"
+  }
+}
+```
+
+## 4. Sign Out
+
+Delete the current session.
+
+### Endpoint
+
+POST /api/auth/signout
+
+### Response
+
+```json
+{
+  "ok": true
+}
+```
+
+## 5. Get Daily Question
 
 Return the daily question. The same date always returns the same question.
 
@@ -23,7 +96,7 @@ The question is fixed per date based on the Asia/Tokyo calendar day.
 }
 ```
 
-## 2. Submit Answer
+## 6. Submit Answer
 
 Submit the user's answer.
 
@@ -50,7 +123,7 @@ POST /api/answer
 }
 ```
 
-### 3. Get Challenge Question
+### 7. Get Challenge Question
 
 Return a random question.
 
@@ -79,7 +152,7 @@ If `exclude_question_id` is provided and another question exists, the API return
 }
 ```
 
-## 4. Get Dashboard Stats
+## 8. Get Dashboard Stats
 
 Return the current user's learning dashboard summary.
 
