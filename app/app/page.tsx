@@ -1,4 +1,7 @@
+import { redirect } from "next/navigation";
+
 import { DailyQuestionScreen } from "@/app/components/daily-question-screen";
+import { getCurrentUser } from "@/app/lib/auth";
 import { getDailyQuestion, getQuestionById, getRandomQuestion } from "@/app/lib/question";
 
 type HomePageProps = {
@@ -10,6 +13,12 @@ type HomePageProps = {
 };
 
 export default async function Home({ searchParams }: HomePageProps) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const params = searchParams ? await searchParams : undefined;
   const initialMode = params?.mode === "challenge" ? "challenge" : "daily";
   const initialQuestionId = params?.question_id;
@@ -23,6 +32,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
   return (
     <DailyQuestionScreen
+      currentUserName={user.name ?? user.email}
       initialMode={initialMode}
       initialQuestionId={initialQuestionId}
       initialExcludeQuestionId={initialExcludeQuestionId}

@@ -34,3 +34,23 @@ They answer the question through a web interface and can challenge more question
 - Supabase (PostgreSQL)
 - Vercel
 - Email API
+
+## Environment Variables
+
+Set these in `app/.env.local` for local development and in your hosting platform for production.
+
+```env
+DATABASE_URL="postgresql://..."
+APP_BASE_URL="http://localhost:3000"
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxx"
+MAIL_FROM="Budledge <noreply@mail.budledge.dev>"
+```
+
+For production, set `APP_BASE_URL` to `https://budledge.dev`.
+
+## Authentication Behavior
+
+- The app uses email-link authentication.
+- `User.email` is treated as the unique account key.
+- Signing in with the same email address resumes the same learning history and dashboard data.
+- For testing a clean first-time experience, use a different email address from existing test accounts.

@@ -1,4 +1,3 @@
-import { getDefaultUser } from "@/app/lib/default-user";
 import { prisma } from "@/app/lib/prisma";
 
 type CategoryStats = {
@@ -57,11 +56,10 @@ function toPercent(value: number, total: number) {
   return Math.round((value / total) * 1000) / 10;
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
-  const user = await getDefaultUser();
+export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const answers = await prisma.answer.findMany({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
     orderBy: {
       answered_at: "asc",

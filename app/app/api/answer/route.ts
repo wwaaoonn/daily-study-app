@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { NextResponse } from "next/server";
 
-import { getDefaultUser } from "@/app/lib/default-user";
+import { requireCurrentUser } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 
 const VALID_CHOICES = new Set(["A", "B", "C", "D"]);
@@ -48,7 +48,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await getDefaultUser();
+    let user;
+
+    try {
+      user = await requireCurrentUser();
+    } catch {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 },
+      );
+    }
+
     const isCorrect = question.correct_choice === selectedChoice;
 
     await prisma.answer.create({

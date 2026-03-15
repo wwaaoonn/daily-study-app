@@ -23,9 +23,9 @@ type AnswerResult = {
 type QuestionMode = "daily" | "challenge";
 
 const choiceOrder: ChoiceKey[] = ["A", "B", "C", "D"];
-const displayName = "Takato";
 
 type DailyQuestionScreenProps = {
+  currentUserName: string;
   initialMode?: QuestionMode;
   initialQuestionId?: string;
   initialExcludeQuestionId?: string;
@@ -40,6 +40,7 @@ function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
 }
 
 export function DailyQuestionScreen({
+  currentUserName,
   initialMode = "daily",
   initialQuestionId,
   initialExcludeQuestionId,
@@ -256,11 +257,18 @@ export function DailyQuestionScreen({
           <div className="mission-header-row">
             <div>
               <p className="mission-eyebrow">{eyebrowText}</p>
-              <h1 className="mission-greeting">{displayName}さん、{greetingText}</h1>
+              <h1 className="mission-greeting">{currentUserName}さん、{greetingText}</h1>
             </div>
-            <Link href={dashboardHref} className="mission-nav-link">
-              ダッシュボードを見る
-            </Link>
+            <div className="mission-header-actions">
+              <Link href={dashboardHref} className="mission-nav-link">
+                ダッシュボードを見る
+              </Link>
+              <form action="/api/auth/signout" method="post">
+                <button type="submit" className="mission-nav-button">
+                  ログアウト
+                </button>
+              </form>
+            </div>
           </div>
         </header>
 

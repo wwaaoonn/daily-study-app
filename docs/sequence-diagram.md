@@ -10,6 +10,19 @@ participant Email
 participant User
 participant WebApp
 
+User->>WebApp: enter email address
+WebApp->>API: request sign-in link
+API->>Database: store verification token
+Database-->>API: success
+API->>Email: send magic link
+Email->>User: deliver sign-in email
+User->>WebApp: open magic link
+WebApp->>API: verify token
+API->>Database: create or load user
+API->>Database: create session
+Database-->>API: success
+API-->>WebApp: authenticated session
+
 Scheduler->>API: trigger daily question
 
 API->>Database: select question
