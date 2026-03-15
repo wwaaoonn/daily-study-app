@@ -71,11 +71,24 @@ function getCalendarTone(count: number) {
   return "dashboard-calendar-cell";
 }
 
-export default async function DashboardPage() {
-  const [stats, questionReturnHref] = await Promise.all([
+type DashboardPageProps = {
+  searchParams?: Promise<{
+    return_mode?: string;
+    return_question_id?: string;
+  }>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const returnMode = params?.return_mode === "challenge" ? "challenge" : "daily";
+  const returnQuestionId = params?.return_question_id;
+  const [stats, fallbackQuestionReturnHref] = await Promise.all([
     getDashboardStats(),
     getQuestionReturnHref(),
   ]);
+  const questionReturnHref = returnQuestionId
+    ? `/?mode=${returnMode}&question_id=${returnQuestionId}`
+    : fallbackQuestionReturnHref;
   const calendarWeeks = buildCalendar(stats.answeredDates);
   const topCategory = stats.categoryBreakdown[0] ?? null;
   const focusCategory =

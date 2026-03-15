@@ -27,6 +27,7 @@ const displayName = "Takato";
 
 type DailyQuestionScreenProps = {
   initialMode?: QuestionMode;
+  initialQuestionId?: string;
   initialExcludeQuestionId?: string;
 };
 
@@ -39,6 +40,7 @@ function getChoiceText(question: DailyQuestion, choice: ChoiceKey) {
 
 export function DailyQuestionScreen({
   initialMode = "daily",
+  initialQuestionId,
   initialExcludeQuestionId,
 }: DailyQuestionScreenProps) {
   const [question, setQuestion] = useState<DailyQuestion | null>(null);
@@ -63,6 +65,21 @@ export function DailyQuestionScreen({
 
       if (!response.ok) {
         throw new Error("問題の取得に失敗しました。");
+      }
+
+      return (await response.json()) as DailyQuestion;
+    }
+
+    async function loadQuestionById(questionId: string) {
+      const searchParams = new URLSearchParams({
+        question_id: questionId,
+      });
+      const response = await fetch(`/api/question?${searchParams.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("指定された問題の取得に失敗しました。");
       }
 
       return (await response.json()) as DailyQuestion;
@@ -102,16 +119,18 @@ export function DailyQuestionScreen({
 
       try {
         const data =
-          initialMode === "challenge"
-            ? await loadChallengeQuestion(initialExcludeQuestionId).catch(() => loadDailyQuestion())
-            : await loadDailyQuestion();
+          initialQuestionId
+            ? await loadQuestionById(initialQuestionId)
+            : initialMode === "challenge"
+              ? await loadChallengeQuestion(initialExcludeQuestionId).catch(() => loadDailyQuestion())
+              : await loadDailyQuestion();
 
         if (!isActive) {
           return;
         }
 
         setQuestion(data);
-        setQuestionMode(initialMode === "challenge" ? "challenge" : "daily");
+        setQuestionMode(initialMode);
       } catch (error) {
         if (!isActive) {
           return;
@@ -131,7 +150,7 @@ export function DailyQuestionScreen({
     return () => {
       isActive = false;
     };
-  }, [initialExcludeQuestionId, initialMode, reloadKey]);
+  }, [initialExcludeQuestionId, initialMode, initialQuestionId, reloadKey]);
 
   async function handleSubmit(choice: ChoiceKey) {
     if (!question || isSubmitting) {
@@ -216,6 +235,10 @@ export function DailyQuestionScreen({
     : questionMode === "daily"
       ? "今日のクエストはこちら！"
       : "次のクエストに挑戦しよう！";
+  const dashboardHref =
+    question && !isAnswered
+      ? `/dashboard?return_mode=${questionMode}&return_question_id=${question.question_id}`
+      : "/dashboard";
 
   return (
     <main className="mission-shell">
@@ -226,7 +249,7 @@ export function DailyQuestionScreen({
               <p className="mission-eyebrow">{eyebrowText}</p>
               <h1 className="mission-greeting">{displayName}さん、{greetingText}</h1>
             </div>
-            <Link href="/dashboard" className="mission-nav-link">
+            <Link href={dashboardHref} className="mission-nav-link">
               ダッシュボードを見る
             </Link>
           </div>

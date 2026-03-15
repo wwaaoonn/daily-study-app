@@ -53,6 +53,15 @@ export async function getRandomQuestion(excludeQuestionId?: string) {
   });
 }
 
+export async function getQuestionById(questionId: string) {
+  return prisma.question.findUnique({
+    where: {
+      id: questionId,
+    },
+    select: questionSelect,
+  });
+}
+
 function hashString(value: string) {
   let hash = 0;
 
