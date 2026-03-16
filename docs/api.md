@@ -94,7 +94,9 @@ The question is fixed per date based on the Asia/Tokyo calendar day.
   "choice_a": "Paris",
   "choice_b": "London",
   "choice_c": "Berlin",
-  "choice_d": "Rome"
+  "choice_d": "Rome",
+  "category": "TOEIC",
+  "category_sub": "前置詞"
 }
 ```
 
@@ -153,7 +155,9 @@ If `exclude_question_id` is provided and another question exists, the API return
   "choice_a": "Paris",
   "choice_b": "London",
   "choice_c": "Berlin",
-  "choice_d": "Rome"
+  "choice_d": "Rome",
+  "category": "TOEIC",
+  "category_sub": "前置詞"
 }
 ```
 
@@ -183,6 +187,16 @@ GET /api/dashboard
       "correctAttempts": 16,
       "correctRate": 80,
       "share": 47.6
+    }
+  ],
+  "subcategoryBreakdown": [
+    {
+      "category": "前置詞",
+      "parentCategory": "TOEIC",
+      "attempts": 12,
+      "correctAttempts": 9,
+      "correctRate": 75,
+      "share": 28.6
     }
   ],
   "answeredDates": [

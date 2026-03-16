@@ -30,6 +30,8 @@ export async function GET(request: Request) {
       choice_b: question.choice_b,
       choice_c: question.choice_c,
       choice_d: question.choice_d,
+      category: question.category,
+      category_sub: question.category_sub,
     });
   } catch (error) {
     console.error("Failed to fetch question:", error);

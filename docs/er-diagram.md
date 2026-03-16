@@ -43,6 +43,7 @@ QUESTION {
  string correct_choice
  text explanation
  string category
+ text category_sub
  int difficulty
 }
 

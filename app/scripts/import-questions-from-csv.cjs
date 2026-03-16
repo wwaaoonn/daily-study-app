@@ -11,6 +11,7 @@ if (typeof process.loadEnvFile === "function") {
 }
 
 const DEFAULT_CATEGORY = "grammar";
+const DEFAULT_CATEGORY_SUB = "";
 const DEFAULT_DIFFICULTY = 1;
 const VALID_CHOICES = new Set(["A", "B", "C", "D"]);
 
@@ -18,6 +19,7 @@ function parseArgs(argv) {
   const options = {
     csvPath: null,
     category: DEFAULT_CATEGORY,
+    categorySub: DEFAULT_CATEGORY_SUB,
     difficulty: DEFAULT_DIFFICULTY,
   };
 
@@ -26,6 +28,12 @@ function parseArgs(argv) {
 
     if (value === "--category") {
       options.category = argv[index + 1] ?? options.category;
+      index += 1;
+      continue;
+    }
+
+    if (value === "--category-sub") {
+      options.categorySub = argv[index + 1] ?? options.categorySub;
       index += 1;
       continue;
     }
@@ -85,6 +93,7 @@ function normalizeRecord(record, index, options) {
     correct_choice: correctChoice,
     explanation,
     category: options.category,
+    category_sub: options.categorySub || null,
     difficulty: options.difficulty,
   };
 }
@@ -140,9 +149,10 @@ async function importQuestions() {
             "correct_choice",
             "explanation",
             "category",
+            "category_sub",
             "difficulty"
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         `,
         [
           randomUUID(),
@@ -154,6 +164,7 @@ async function importQuestions() {
           question.correct_choice,
           question.explanation,
           question.category,
+          question.category_sub,
           question.difficulty,
         ],
       );

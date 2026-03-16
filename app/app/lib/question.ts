@@ -7,6 +7,8 @@ export const questionSelect = {
   choice_b: true,
   choice_c: true,
   choice_d: true,
+  category: true,
+  category_sub: true,
 } as const;
 
 export function getDateKeyInJst(date: Date) {

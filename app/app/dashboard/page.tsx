@@ -93,6 +93,52 @@ function getCalendarTone(count: number) {
   return "dashboard-calendar-cell";
 }
 
+function buildFocusSuggestion(stats: Awaited<ReturnType<typeof getDashboardStats>>) {
+  if (stats.totalAttempts === 0) {
+    return "カテゴリ別の傾向を出すには、まず複数カテゴリに回答をためていくのがおすすめです。";
+  }
+
+  const focusCategory =
+    [...stats.categoryBreakdown]
+      .filter((category) => category.attempts >= 2)
+      .sort((left, right) => left.correctRate - right.correctRate || right.attempts - left.attempts)[0] ??
+    null;
+  const focusSubcategory =
+    [...stats.subcategoryBreakdown]
+      .filter((subcategory) => subcategory.attempts >= 2)
+      .sort((left, right) => left.correctRate - right.correctRate || right.attempts - left.attempts)[0] ??
+    null;
+
+  if (!focusCategory && !focusSubcategory) {
+    return "まだ傾向を決めるにはデータが少なめです。まずは同じカテゴリや subcategory に2〜3問ずつ触れていくと、得意不得意が見えやすくなります。";
+  }
+
+  const parentCategory =
+    focusSubcategory
+      ? stats.categoryBreakdown.find((category) => category.category === focusSubcategory.parentCategory) ?? null
+      : null;
+
+  if (
+    focusSubcategory &&
+    (focusSubcategory.attempts >= 3 ||
+      !parentCategory ||
+      focusSubcategory.correctRate <= parentCategory.correctRate - 5)
+  ) {
+    const comparison =
+      parentCategory
+        ? `親カテゴリの${parentCategory.category}全体では正答率${parentCategory.correctRate}%なので、まずはこの subcategory を優先して補強するとバランスが取りやすいです。`
+        : "この subcategory を優先して補強すると、次の数問で弱点を埋めやすくなります。";
+
+    return `${focusSubcategory.parentCategory}の「${focusSubcategory.category}」は${focusSubcategory.attempts}問挑戦して正答率${focusSubcategory.correctRate}%です。${comparison}`;
+  }
+
+  if (focusCategory) {
+    return `${focusCategory.category}は${focusCategory.attempts}問挑戦して正答率${focusCategory.correctRate}%です。さらに細かい弱点を見つけるために、このカテゴリ内の subcategory を少しずつ増やしていくのがおすすめです。`;
+  }
+
+  return "まだ傾向を決めるにはデータが少なめです。まずは同じカテゴリや subcategory に2〜3問ずつ触れていくと、得意不得意が見えやすくなります。";
+}
+
 type DashboardPageProps = {
   searchParams?: Promise<{
     return_mode?: string;
@@ -119,11 +165,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     : fallbackQuestionReturnHref;
   const calendarWeeks = buildCalendar(stats.answeredDates);
   const topCategory = stats.categoryBreakdown[0] ?? null;
-  const focusCategory =
-    [...stats.categoryBreakdown]
-      .filter((category) => category.attempts >= 2)
-      .sort((left, right) => left.correctRate - right.correctRate || right.attempts - left.attempts)[0] ??
-    null;
+  const focusSuggestion = buildFocusSuggestion(stats);
+  const subcategoryGroups = Array.from(
+    stats.subcategoryBreakdown.reduce((map, subcategory) => {
+      const group = map.get(subcategory.parentCategory) ?? [];
+      group.push(subcategory);
+      map.set(subcategory.parentCategory, group);
+      return map;
+    }, new Map<string, typeof stats.subcategoryBreakdown>()),
+  );
 
   return (
     <main className="dashboard-shell">
@@ -187,25 +237,68 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 まだ回答データがありません。まずは1問チャレンジすると、カテゴリの偏りが見えるようになります。
               </p>
             ) : (
-              <div className="dashboard-category-list">
-                {stats.categoryBreakdown.map((category) => (
-                  <section key={category.category} className="dashboard-category-row">
-                    <div className="dashboard-category-head">
-                      <p className="dashboard-category-name">{category.category}</p>
-                      <p className="dashboard-category-meta">
-                        {category.share}% / {category.attempts}問 / 正答率 {category.correctRate}%
-                      </p>
-                    </div>
-                    <div
-                      className="dashboard-category-bar"
-                      role="img"
-                      aria-label={`${category.category}が全体の${category.share}%`}
-                    >
-                      <span style={{ width: `${Math.max(category.share, 6)}%` }} />
-                    </div>
-                  </section>
-                ))}
-              </div>
+              <>
+                <div className="dashboard-breakdown-section">
+                  <p className="dashboard-breakdown-label">Category</p>
+                  <div className="dashboard-category-list">
+                    {stats.categoryBreakdown.map((category) => (
+                      <section key={category.category} className="dashboard-category-row">
+                        <div className="dashboard-category-head">
+                          <p className="dashboard-category-name">{category.category}</p>
+                          <p className="dashboard-category-meta">
+                            正答率 {category.correctRate}% / {category.attempts}問
+                          </p>
+                        </div>
+                        <div
+                          className="dashboard-category-bar"
+                          role="img"
+                          aria-label={`${category.category}の正答率${category.correctRate}%`}
+                        >
+                          <span style={{ width: `${Math.max(category.correctRate, 6)}%` }} />
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="dashboard-breakdown-section">
+                  <p className="dashboard-breakdown-label">Subcategory</p>
+                  <div className="dashboard-subcategory-groups">
+                    {subcategoryGroups.map(([parentCategory, subcategories]) => (
+                      <section key={parentCategory} className="dashboard-subcategory-group">
+                        <div className="dashboard-subcategory-group-header">
+                          <p className="dashboard-subcategory-group-title">{parentCategory}</p>
+                          <p className="dashboard-category-meta">
+                            {subcategories.reduce((sum, item) => sum + item.attempts, 0)}問
+                          </p>
+                        </div>
+                        <div className="dashboard-category-list dashboard-category-list-compact">
+                          {subcategories.map((subcategory) => (
+                            <section
+                              key={`${subcategory.parentCategory}-${subcategory.category}`}
+                              className="dashboard-category-row"
+                            >
+                              <div className="dashboard-category-head">
+                                <p className="dashboard-category-name">{subcategory.category}</p>
+                                <p className="dashboard-category-meta">
+                                  正答率 {subcategory.correctRate}% / {subcategory.attempts}問
+                                </p>
+                              </div>
+                              <div
+                                className="dashboard-category-bar"
+                                role="img"
+                                aria-label={`${parentCategory}の${subcategory.category}の正答率${subcategory.correctRate}%`}
+                              >
+                                <span style={{ width: `${Math.max(subcategory.correctRate, 6)}%` }} />
+                              </div>
+                            </section>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </article>
 
@@ -215,7 +308,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <p className="dashboard-card-eyebrow">Consistency</p>
                 <h2 className="dashboard-card-title">回答カレンダー</h2>
               </div>
-              <p className="dashboard-card-caption">過去50日</p>
+              <p className="dashboard-card-caption">過去70日</p>
             </div>
 
             <div className="dashboard-calendar-wrap">
@@ -260,11 +353,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <article className="dashboard-card dashboard-insight-card">
             <p className="dashboard-card-eyebrow">Focus Suggestion</p>
             <h2 className="dashboard-card-title">次に伸ばしたいポイント</h2>
-            <p className="dashboard-insight-copy">
-              {focusCategory
-                ? `${focusCategory.category}は${focusCategory.attempts}問挑戦して正答率${focusCategory.correctRate}%です。次の数問はこのカテゴリを厚めに出すと、ダッシュボード改善が見えやすくなります。`
-                : "カテゴリ別の傾向を出すには、まず複数カテゴリに回答をためていくのがおすすめです。"}
-            </p>
+            <p className="dashboard-insight-copy">{focusSuggestion}</p>
           </article>
 
           <article className="dashboard-card dashboard-insight-card">

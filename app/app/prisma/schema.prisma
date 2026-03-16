@@ -33,6 +33,7 @@ model Question {
   correct_choice   String
   explanation      String
   category         String
+  category_sub     String?
   difficulty       Int
   answers          Answer[]
   daily_deliveries DailyDelivery[]
