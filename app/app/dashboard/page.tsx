@@ -93,6 +93,52 @@ function getCalendarTone(count: number) {
   return "dashboard-calendar-cell";
 }
 
+function buildFocusSuggestion(stats: Awaited<ReturnType<typeof getDashboardStats>>) {
+  if (stats.totalAttempts === 0) {
+    return "カテゴリ別の傾向を出すには、まず複数カテゴリに回答をためていくのがおすすめです。";
+  }
+
+  const focusCategory =
+    [...stats.categoryBreakdown]
+      .filter((category) => category.attempts >= 2)
+      .sort((left, right) => left.correctRate - right.correctRate || right.attempts - left.attempts)[0] ??
+    null;
+  const focusSubcategory =
+    [...stats.subcategoryBreakdown]
+      .filter((subcategory) => subcategory.attempts >= 2)
+      .sort((left, right) => left.correctRate - right.correctRate || right.attempts - left.attempts)[0] ??
+    null;
+
+  if (!focusCategory && !focusSubcategory) {
+    return "まだ傾向を決めるにはデータが少なめです。まずは同じカテゴリや subcategory に2〜3問ずつ触れていくと、得意不得意が見えやすくなります。";
+  }
+
+  const parentCategory =
+    focusSubcategory
+      ? stats.categoryBreakdown.find((category) => category.category === focusSubcategory.parentCategory) ?? null
+      : null;
+
+  if (
+    focusSubcategory &&
+    (focusSubcategory.attempts >= 3 ||
+      !parentCategory ||
+      focusSubcategory.correctRate <= parentCategory.correctRate - 5)
+  ) {
+    const comparison =
+      parentCategory
+        ? `親カテゴリの${parentCategory.category}全体では正答率${parentCategory.correctRate}%なので、まずはこの subcategory を優先して補強するとバランスが取りやすいです。`
+        : "この subcategory を優先して補強すると、次の数問で弱点を埋めやすくなります。";
+
+    return `${focusSubcategory.parentCategory}の「${focusSubcategory.category}」は${focusSubcategory.attempts}問挑戦して正答率${focusSubcategory.correctRate}%です。${comparison}`;
+  }
+
+  if (focusCategory) {
+    return `${focusCategory.category}は${focusCategory.attempts}問挑戦して正答率${focusCategory.correctRate}%です。さらに細かい弱点を見つけるために、このカテゴリ内の subcategory を少しずつ増やしていくのがおすすめです。`;
+  }
+
+  return "まだ傾向を決めるにはデータが少なめです。まずは同じカテゴリや subcategory に2〜3問ずつ触れていくと、得意不得意が見えやすくなります。";
+}
+
 type DashboardPageProps = {
   searchParams?: Promise<{
     return_mode?: string;
@@ -119,11 +165,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     : fallbackQuestionReturnHref;
   const calendarWeeks = buildCalendar(stats.answeredDates);
   const topCategory = stats.categoryBreakdown[0] ?? null;
-  const focusCategory =
-    [...stats.categoryBreakdown]
-      .filter((category) => category.attempts >= 2)
-      .sort((left, right) => left.correctRate - right.correctRate || right.attempts - left.attempts)[0] ??
-    null;
+  const focusSuggestion = buildFocusSuggestion(stats);
   const subcategoryGroups = Array.from(
     stats.subcategoryBreakdown.reduce((map, subcategory) => {
       const group = map.get(subcategory.parentCategory) ?? [];
@@ -311,11 +353,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <article className="dashboard-card dashboard-insight-card">
             <p className="dashboard-card-eyebrow">Focus Suggestion</p>
             <h2 className="dashboard-card-title">次に伸ばしたいポイント</h2>
-            <p className="dashboard-insight-copy">
-              {focusCategory
-                ? `${focusCategory.category}は${focusCategory.attempts}問挑戦して正答率${focusCategory.correctRate}%です。次の数問はこのカテゴリを厚めに出すと、ダッシュボード改善が見えやすくなります。`
-                : "カテゴリ別の傾向を出すには、まず複数カテゴリに回答をためていくのがおすすめです。"}
-            </p>
+            <p className="dashboard-insight-copy">{focusSuggestion}</p>
           </article>
 
           <article className="dashboard-card dashboard-insight-card">
