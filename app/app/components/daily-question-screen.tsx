@@ -12,6 +12,8 @@ type DailyQuestion = {
   choice_b: string;
   choice_c: string;
   choice_d: string;
+  category: string;
+  category_sub: string | null;
 };
 
 type AnswerResult = {
@@ -381,6 +383,14 @@ export function DailyQuestionScreen({
             {!isAnswered && !showChallengeOnlyErrorState ? (
               <>
                 <section className="mission-card mission-question-card">
+                  <div className="mission-question-meta" aria-label="問題カテゴリ">
+                    <span className="mission-question-tag">{question.category}</span>
+                    {question.category_sub ? (
+                      <span className="mission-question-tag mission-question-tag-sub">
+                        {question.category_sub}
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="mission-question">{question.prompt}</p>
                 </section>
 

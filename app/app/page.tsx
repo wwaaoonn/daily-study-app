@@ -80,6 +80,8 @@ export default async function Home({ searchParams }: HomePageProps) {
               choice_b: initialQuestion.choice_b,
               choice_c: initialQuestion.choice_c,
               choice_d: initialQuestion.choice_d,
+              category: initialQuestion.category,
+              category_sub: initialQuestion.category_sub,
             }
           : null
       }

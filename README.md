@@ -1,4 +1,4 @@
-# Budledge ~a Daily Study App~
+# Budledge \~a Daily Study App\~
 
 ![Daily Study App screenshot](docs/images/app-top.png)
 

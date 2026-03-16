@@ -106,6 +106,31 @@ button {
   padding-bottom: 28px;
 }
 
+.mission-question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.mission-question-tag {
+  background: #eef7d8;
+  border: 1px solid rgba(87, 212, 0, 0.18);
+  border-radius: 999px;
+  color: var(--accent-dark);
+  display: inline-flex;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 7px 12px;
+}
+
+.mission-question-tag-sub {
+  background: rgba(37, 37, 37, 0.04);
+  border-color: rgba(37, 37, 37, 0.08);
+  color: var(--foreground);
+}
+
 .mission-question {
   font-size: clamp(1.65rem, 3vw, 2.9rem);
   font-weight: 800;
@@ -696,6 +721,11 @@ button {
   .mission-card {
     border-radius: 20px;
     padding: 18px 16px;
+  }
+
+  .mission-question-meta {
+    gap: 8px;
+    margin-bottom: 16px;
   }
 
   .mission-choice-grid {
