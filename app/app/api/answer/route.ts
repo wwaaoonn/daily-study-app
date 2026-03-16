@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 
 import { ChoiceKey, VALID_CHOICES, createAnswer } from "@/app/lib/answer";
 import { requireCurrentUser } from "@/app/lib/auth";
+import { getDailyQuestion } from "@/app/lib/question";
 
 type SubmitAnswerRequest = {
   question_id?: string;
   selected_choice?: string;
+  question_mode?: string;
 };
 
 export async function POST(request: Request) {
@@ -13,6 +15,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as SubmitAnswerRequest;
     const questionId = body.question_id?.trim();
     const selectedChoice = body.selected_choice?.trim().toUpperCase();
+    const requestedMode = body.question_mode?.trim().toLowerCase();
 
     if (!questionId || !selectedChoice) {
       return NextResponse.json(
@@ -39,10 +42,20 @@ export async function POST(request: Request) {
       );
     }
 
+    const dailyQuestion = await getDailyQuestion();
+    const questionMode =
+      requestedMode === "challenge" || requestedMode === "daily"
+        ? requestedMode
+        : dailyQuestion?.id === questionId
+          ? "daily"
+          : "challenge";
+
     const result = await createAnswer({
       userId: user.id,
       questionId,
       selectedChoice: selectedChoice as ChoiceKey,
+      source: "web",
+      sourceDetail: `web:${questionMode}`,
     });
 
     if (!result) {
@@ -51,6 +64,14 @@ export async function POST(request: Request) {
         { status: 404 },
       );
     }
+
+    console.info("Answer recorded.", {
+      answerId: result.answerId,
+      userId: user.id,
+      questionId: result.questionId,
+      source: result.source,
+      sourceDetail: result.sourceDetail,
+    });
 
     return NextResponse.json({
       correct: result.correct,

@@ -14,6 +14,8 @@ export async function createAnswer(input: {
   userId: string;
   questionId: string;
   selectedChoice: ChoiceKey;
+  source?: string;
+  sourceDetail?: string | null;
 }) {
   const question = await prisma.question.findUnique({
     where: { id: input.questionId },
@@ -36,12 +38,16 @@ export async function createAnswer(input: {
       question_id: question.id,
       selected_choice: input.selectedChoice,
       is_correct: isCorrect,
+      source: input.source ?? "unknown",
+      source_detail: input.sourceDetail ?? null,
     },
     select: {
       id: true,
       question_id: true,
       selected_choice: true,
       is_correct: true,
+      source: true,
+      source_detail: true,
       question: {
         select: {
           correct_choice: true,
@@ -58,6 +64,8 @@ export async function createAnswer(input: {
     correct: answer.is_correct,
     correctChoice: answer.question.correct_choice as ChoiceKey,
     explanation: answer.question.explanation,
+    source: answer.source,
+    sourceDetail: answer.source_detail,
   };
 }
 
@@ -75,6 +83,8 @@ export async function getAnswerResultById(input: {
       question_id: true,
       selected_choice: true,
       is_correct: true,
+      source: true,
+      source_detail: true,
       question: {
         select: {
           correct_choice: true,
@@ -95,5 +105,7 @@ export async function getAnswerResultById(input: {
     correct: answer.is_correct,
     correctChoice: answer.question.correct_choice as ChoiceKey,
     explanation: answer.question.explanation,
+    source: answer.source,
+    sourceDetail: answer.source_detail,
   };
 }

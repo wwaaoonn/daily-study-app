@@ -24,6 +24,7 @@ Important files:
 - Root Prisma config: `prisma.config.ts`
 
 The application reads `DATABASE_URL` directly in `app/app/lib/prisma.ts`.
+Answer rows also record a lightweight source trace so you can distinguish web answers from email-link answers during incident investigation.
 
 ## Recommended Connection Strategy
 
@@ -128,6 +129,22 @@ npm run dev
 ```
 
 If the app can load questions and save answers correctly, the local migration is complete.
+
+## Applying New Prisma Migrations
+
+When a migration changes production data types, apply it before deploying app code that depends on the new schema.
+
+From the repository root:
+
+```bash
+DATABASE_URL="$(awk -F'\"' '/^DATABASE_URL=/{print $2}' app/.env.local)" \
+  npx prisma migrate deploy --schema app/app/prisma/schema.prisma --config prisma.config.ts
+```
+
+This repository now includes a migration that:
+
+- stores `Answer.source` and `Answer.source_detail` for answer-path investigation
+- converts date-time columns from `TIMESTAMP` to `TIMESTAMPTZ`
 
 ## Production Environment Variables
 

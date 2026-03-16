@@ -111,9 +111,12 @@ POST /api/answer
 ```json
 {
   "question_id": "uuid",
-  "selected_choice": "A"
+  "selected_choice": "A",
+  "question_mode": "daily"
 }
 ```
+
+`question_mode` is optional and is used for answer-source tracing (`daily` or `challenge`).
 
 ### Response
 
