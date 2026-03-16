@@ -567,6 +567,25 @@ button {
   margin-top: 24px;
 }
 
+.dashboard-category-list-compact {
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.dashboard-breakdown-section + .dashboard-breakdown-section {
+  border-top: 1px solid rgba(37, 37, 37, 0.08);
+  margin-top: 28px;
+  padding-top: 28px;
+}
+
+.dashboard-breakdown-label {
+  color: var(--accent-dark);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .dashboard-category-row {
   display: grid;
   gap: 10px;
@@ -582,6 +601,33 @@ button {
 .dashboard-category-name {
   font-size: 1.05rem;
   font-weight: 700;
+}
+
+.dashboard-subcategory-groups {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.dashboard-subcategory-group {
+  background: rgba(87, 212, 0, 0.05);
+  border: 1px solid rgba(87, 212, 0, 0.12);
+  border-radius: 18px;
+  padding: 18px 16px;
+}
+
+.dashboard-subcategory-group-header {
+  align-items: baseline;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.dashboard-subcategory-group-title {
+  color: var(--accent-dark);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .dashboard-category-meta,

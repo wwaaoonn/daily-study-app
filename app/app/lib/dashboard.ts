@@ -8,6 +8,12 @@ type CategoryStats = {
   share: number;
 };
 
+type SubcategoryStats = CategoryStats & {
+  parentCategory: string;
+};
+
+const UNCATEGORIZED_SUBCATEGORY_LABEL = "未設定";
+
 type DailyActivity = {
   date: string;
   count: number;
@@ -22,6 +28,7 @@ export type DashboardStats = {
   longestStreak: number;
   recentAttempts: number;
   categoryBreakdown: CategoryStats[];
+  subcategoryBreakdown: SubcategoryStats[];
   answeredDates: DailyActivity[];
 };
 
@@ -70,6 +77,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
       question: {
         select: {
           category: true,
+          category_sub: true,
         },
       },
     },
@@ -79,6 +87,10 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
   const correctAttempts = answers.filter((answer) => answer.is_correct).length;
   const recentThreshold = getPastDateKey(6);
   const categoryMap = new Map<string, { attempts: number; correctAttempts: number }>();
+  const subcategoryMap = new Map<
+    string,
+    { category: string; attempts: number; correctAttempts: number }
+  >();
   const activityMap = new Map<string, number>();
 
   let recentAttempts = 0;
@@ -86,15 +98,25 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
   for (const answer of answers) {
     const dateKey = getDateKeyInJst(answer.answered_at);
     const category = answer.question.category;
+    const subcategory = answer.question.category_sub?.trim() || UNCATEGORIZED_SUBCATEGORY_LABEL;
+    const subcategoryKey = `${category}::${subcategory}`;
     const categoryStats = categoryMap.get(category) ?? { attempts: 0, correctAttempts: 0 };
+    const subcategoryStats = subcategoryMap.get(subcategoryKey) ?? {
+      category: subcategory,
+      attempts: 0,
+      correctAttempts: 0,
+    };
 
     categoryStats.attempts += 1;
+    subcategoryStats.attempts += 1;
 
     if (answer.is_correct) {
       categoryStats.correctAttempts += 1;
+      subcategoryStats.correctAttempts += 1;
     }
 
     categoryMap.set(category, categoryStats);
+    subcategoryMap.set(subcategoryKey, subcategoryStats);
     activityMap.set(dateKey, (activityMap.get(dateKey) ?? 0) + 1);
 
     if (dateKey >= recentThreshold) {
@@ -115,6 +137,26 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
       share: toPercent(stats.attempts, totalAttempts),
     }))
     .sort((left, right) => right.attempts - left.attempts || left.category.localeCompare(right.category));
+
+  const subcategoryBreakdown = [...subcategoryMap.entries()]
+    .map(([subcategoryKey, stats]) => {
+      const [parentCategory] = subcategoryKey.split("::", 1);
+
+      return {
+        category: stats.category,
+        parentCategory,
+        attempts: stats.attempts,
+        correctAttempts: stats.correctAttempts,
+        correctRate: toPercent(stats.correctAttempts, stats.attempts),
+        share: toPercent(stats.attempts, totalAttempts),
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.attempts - left.attempts ||
+        left.parentCategory.localeCompare(right.parentCategory) ||
+        left.category.localeCompare(right.category),
+    );
 
   const answeredDateKeys = answeredDates.map((entry) => entry.date);
   const todayKey = getDateKeyInJst(new Date());
@@ -155,6 +197,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
     longestStreak,
     recentAttempts,
     categoryBreakdown,
+    subcategoryBreakdown,
     answeredDates,
   };
 }

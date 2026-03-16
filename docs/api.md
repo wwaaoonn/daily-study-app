@@ -189,6 +189,16 @@ GET /api/dashboard
       "share": 47.6
     }
   ],
+  "subcategoryBreakdown": [
+    {
+      "category": "前置詞",
+      "parentCategory": "TOEIC",
+      "attempts": 12,
+      "correctAttempts": 9,
+      "correctRate": 75,
+      "share": 28.6
+    }
+  ],
   "answeredDates": [
     {
       "date": "2026-03-15",
