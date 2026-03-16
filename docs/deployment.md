@@ -138,12 +138,18 @@ Recommended production variables:
 ```env
 DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
 DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
+CRON_SECRET="a-long-random-shared-secret"
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxx"
+MAIL_FROM="Budledge <noreply@mail.budledge.dev>"
+APP_BASE_URL="https://budledge.dev"
 ```
 
 Use:
 
 - `DATABASE_URL` for the deployed app
 - `DIRECT_DATABASE_URL` only for admin tasks, migrations, or debugging workflows
+- `CRON_SECRET` for authenticating Vercel Cron requests to `/api/cron/daily-question`
+- `RESEND_API_KEY`, `MAIL_FROM`, and `APP_BASE_URL` for sending daily emails with production links
 
 ## Vercel Setup
 
@@ -167,6 +173,10 @@ Set these in the Vercel project settings.
 
 ```env
 DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+CRON_SECRET="a-long-random-shared-secret"
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxx"
+MAIL_FROM="Budledge <noreply@mail.budledge.dev>"
+APP_BASE_URL="https://budledge.dev"
 ```
 
 Optional:
@@ -181,6 +191,7 @@ Preview deployments can usually use the same database at first:
 
 ```env
 DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+CRON_SECRET="a-long-random-shared-secret"
 ```
 
 If you later want safer isolation, switch Preview to a separate Supabase project.
@@ -195,9 +206,12 @@ If you later want safer isolation, switch Preview to a separate Supabase project
    - confirm the framework is `Next.js`
 5. Open `Environment Variables`.
 6. Add `DATABASE_URL` for `Production`.
-7. Add `DATABASE_URL` for `Preview` if you want preview deployments to work.
-8. Optionally add `DIRECT_DATABASE_URL` for future migration or admin workflows.
-9. Start the first deployment.
+7. Add `CRON_SECRET` for `Production` so Vercel Cron can authenticate to `/api/cron/daily-question`.
+8. Add `RESEND_API_KEY`, `MAIL_FROM`, and `APP_BASE_URL` for any environment that should send emails.
+9. Add `DATABASE_URL` for `Preview` if you want preview deployments to work.
+10. Add `CRON_SECRET` for `Preview` if Preview should also support cron testing.
+11. Optionally add `DIRECT_DATABASE_URL` for future migration or admin workflows.
+12. Start the first deployment.
 
 ### After the first deployment
 
@@ -213,7 +227,9 @@ Then inspect the Vercel function logs if something fails.
 
 - `Root Directory` was left at the repository root instead of `app`
 - `DATABASE_URL` was set to `5432` instead of `6543` for serverless runtime
+- `CRON_SECRET` was missing, so the cron endpoint could not authenticate scheduled requests
 - the Supabase password was copied incorrectly
+- `RESEND_API_KEY`, `MAIL_FROM`, or `APP_BASE_URL` was missing in the environment that should send emails
 - environment variables were added only for one environment and not for the one being deployed
 
 ### Prisma on Vercel
@@ -270,6 +286,10 @@ DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.
 ```env
 DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
 DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
+CRON_SECRET="a-long-random-shared-secret"
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxx"
+MAIL_FROM="Budledge <noreply@mail.budledge.dev>"
+APP_BASE_URL="https://budledge.dev"
 ```
 
 ## Deployment Checklist
@@ -282,6 +302,8 @@ DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.
 - `app/.env.local` updated to Supabase `5432`
 - Local `npm run dev` verified
 - Production `DATABASE_URL` configured to Supabase `6543`
+- Production `CRON_SECRET` configured in Vercel
+- Production `RESEND_API_KEY`, `MAIL_FROM`, and `APP_BASE_URL` configured in Vercel
 - Production `DIRECT_DATABASE_URL` stored securely
 
 ## Troubleshooting
@@ -304,6 +326,8 @@ Check that:
 
 - production uses the `6543` connection string
 - the password is correct
+- `CRON_SECRET` is set for the deployed environment
+- `RESEND_API_KEY`, `MAIL_FROM`, and `APP_BASE_URL` are set for the deployed environment
 - the environment variables are set in the hosting provider
 
 ### Prisma migration errors after import
