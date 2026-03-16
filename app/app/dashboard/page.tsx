@@ -246,15 +246,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                         <div className="dashboard-category-head">
                           <p className="dashboard-category-name">{category.category}</p>
                           <p className="dashboard-category-meta">
-                            {category.share}% / {category.attempts}問 / 正答率 {category.correctRate}%
+                            正答率 {category.correctRate}% / {category.attempts}問
                           </p>
                         </div>
                         <div
                           className="dashboard-category-bar"
                           role="img"
-                          aria-label={`${category.category}が全体の${category.share}%`}
+                          aria-label={`${category.category}の正答率${category.correctRate}%`}
                         >
-                          <span style={{ width: `${Math.max(category.share, 6)}%` }} />
+                          <span style={{ width: `${Math.max(category.correctRate, 6)}%` }} />
                         </div>
                       </section>
                     ))}
@@ -281,15 +281,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                               <div className="dashboard-category-head">
                                 <p className="dashboard-category-name">{subcategory.category}</p>
                                 <p className="dashboard-category-meta">
-                                  {subcategory.share}% / {subcategory.attempts}問 / 正答率 {subcategory.correctRate}%
+                                  正答率 {subcategory.correctRate}% / {subcategory.attempts}問
                                 </p>
                               </div>
                               <div
                                 className="dashboard-category-bar"
                                 role="img"
-                                aria-label={`${parentCategory}の${subcategory.category}が全体の${subcategory.share}%`}
+                                aria-label={`${parentCategory}の${subcategory.category}の正答率${subcategory.correctRate}%`}
                               >
-                                <span style={{ width: `${Math.max(subcategory.share, 6)}%` }} />
+                                <span style={{ width: `${Math.max(subcategory.correctRate, 6)}%` }} />
                               </div>
                             </section>
                           ))}
@@ -308,7 +308,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <p className="dashboard-card-eyebrow">Consistency</p>
                 <h2 className="dashboard-card-title">回答カレンダー</h2>
               </div>
-              <p className="dashboard-card-caption">過去50日</p>
+              <p className="dashboard-card-caption">過去70日</p>
             </div>
 
             <div className="dashboard-calendar-wrap">
