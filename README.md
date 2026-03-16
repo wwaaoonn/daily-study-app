@@ -47,7 +47,11 @@ MAIL_FROM="Budledge <noreply@mail.budledge.dev>"
 CRON_SECRET="your-shared-secret"
 ```
 
-For production, set `APP_BASE_URL` to `https://budledge.dev`.
+For production:
+
+- set `APP_BASE_URL` to `https://budledge.dev`
+- set `CRON_SECRET` in Vercel Production so scheduled requests can authenticate to `/api/cron/daily-question`
+- set `RESEND_API_KEY` and `MAIL_FROM` in the same environment that should send daily emails
 
 ## Daily Email Delivery
 
@@ -58,6 +62,28 @@ For production, set `APP_BASE_URL` to `https://budledge.dev`.
 - Each choice uses a single-use email answer link. The first click signs the user in, saves the answer, and redirects to the result screen.
 - If the user opens the link again after it has already been consumed, the app shows that the link is already used and offers a challenge question instead.
 - For manual testing, `GET /api/cron/daily-question` also supports `question_id` and `force_resend=true` query parameters.
+
+### Required Production Settings
+
+- `DATABASE_URL`
+- `APP_BASE_URL`
+- `RESEND_API_KEY`
+- `MAIL_FROM`
+- `CRON_SECRET`
+
+If `CRON_SECRET` is missing in Vercel, the scheduled request can reach the endpoint but fail before any `DailyDelivery` rows are created.
+
+### Manual Resend
+
+If the scheduled delivery fails for a given day, you can retry it manually:
+
+```bash
+curl -i \
+  -H "Authorization: Bearer <CRON_SECRET>" \
+  "https://budledge.dev/api/cron/daily-question?force_resend=true"
+```
+
+After running it, confirm that the target user received the email and that `DailyDelivery.status` is `sent` for that `delivery_date`.
 
 ## Authentication Behavior
 

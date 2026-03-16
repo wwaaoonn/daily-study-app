@@ -58,7 +58,7 @@ function isEmailAnswerLinkError(error: string | null | undefined) {
 
 function getEmailAnswerNoticeMessage(notice: string | null | undefined) {
   if (notice === "already-answered") {
-    return "この問題はすでに回答済みだったため、保存済みの結果を表示しています。今回メールで押した選択肢は新しい回答としては反映されていません。";
+    return "この問題には本日すでに回答済みだったため、保存済みの結果を表示しています。今回メールで押した選択肢は新しい回答としては反映されていません。";
   }
 
   return null;
@@ -235,6 +235,7 @@ export function DailyQuestionScreen({
         body: JSON.stringify({
           question_id: question.question_id,
           selected_choice: choice,
+          question_mode: questionMode,
         }),
       });
 

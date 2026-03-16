@@ -95,6 +95,8 @@ export async function GET(request: Request) {
             userId: delivery.user_id,
             questionId: delivery.question_id,
             selectedChoice,
+            source: "email-link",
+            sourceDetail: `email-link:${delivery.delivery_date}`,
           });
 
     if (!answerResult) {
@@ -106,7 +108,22 @@ export async function GET(request: Request) {
     redirectUrl.searchParams.set("answer_id", answerResult.answerId);
 
     if (existingAnswer) {
+      console.info("Email answer reused existing answer.", {
+        answerId: existingAnswer.id,
+        userId: delivery.user_id,
+        questionId: delivery.question_id,
+        deliveryDate: delivery.delivery_date,
+      });
       redirectUrl.searchParams.set("email_answer_notice", "already-answered");
+    } else {
+      console.info("Email answer recorded.", {
+        answerId: answerResult.answerId,
+        userId: delivery.user_id,
+        questionId: delivery.question_id,
+        deliveryDate: delivery.delivery_date,
+        source: answerResult.source,
+        sourceDetail: answerResult.sourceDetail,
+      });
     }
 
     return NextResponse.redirect(redirectUrl);
