@@ -13,7 +13,7 @@ POST /api/auth/request-link
 ```json
 {
   "email": "user@example.com",
-  "name": "Takato"
+  "name": "Bob"
 }
 ```
 
@@ -54,7 +54,7 @@ GET /api/auth/session
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "name": "Takato"
+    "name": "Bob"
   }
 }
 ```
