@@ -109,16 +109,28 @@ If it was imported successfully, future Prisma deployments are simpler and safer
 
 ## Local Development Configuration
 
-After the data migration, point local development to Supabase.
+After the data migration, do not point local development at the production database.
+Use one of these options instead:
+
+- a separate Supabase project for development
+- a local PostgreSQL instance on your machine
+
+Recommended default for this project:
+
+- `dev`: separate Supabase project or local PostgreSQL
+- `prod`: the production Supabase project used by Vercel
+
+If you want the smallest risk of mistakes, create a second Supabase project and keep it exclusively for local development and testing.
 
 Edit `app/.env.local`:
 
 ```env
-# Local development against Supabase
-DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
+# Local development only
+# Use a dedicated development database, not the production project.
+DATABASE_URL="postgresql://postgres.[DEV_PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
 
 # Optional: use for maintenance or future Prisma workflows
-DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
+DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[DEV_PROJECT_REF].supabase.co:5432/postgres"
 ```
 
 Then start the app:
@@ -129,6 +141,15 @@ npm run dev
 ```
 
 If the app can load questions and save answers correctly, the local migration is complete.
+
+### If you need production-like data locally
+
+Do not connect your local app directly to production just to inspect data.
+Instead:
+
+1. export a sanitized snapshot from production
+2. import it into the development database
+3. run local development against that copied data
 
 ## Applying New Prisma Migrations
 
@@ -204,10 +225,14 @@ DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.
 
 #### Preview
 
-Preview deployments can usually use the same database at first:
+Preview deployments can technically use the same database at first, but that is risky because test traffic, cron runs, and schema changes can mix with production data.
+Prefer one of these approaches:
+
+- safest: separate Supabase project for Preview
+- acceptable early-stage fallback: reuse the development database, not production
 
 ```env
-DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+DATABASE_URL="postgresql://postgres.[DEV_OR_PREVIEW_PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
 CRON_SECRET="a-long-random-shared-secret"
 ```
 
@@ -294,8 +319,8 @@ Important notes:
 ### Local development
 
 ```env
-DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
-DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres.[DEV_PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres"
+DIRECT_DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[DEV_PROJECT_REF].supabase.co:5432/postgres"
 ```
 
 ### Production
@@ -312,11 +337,12 @@ APP_BASE_URL="https://budledge.dev"
 ## Deployment Checklist
 
 - Supabase project created
+- Separate development database prepared
 - Existing local data exported with `pg_dump`
 - Supabase import completed with `psql`
 - Row counts verified in Supabase
 - `_prisma_migrations` confirmed
-- `app/.env.local` updated to Supabase `5432`
+- `app/.env.local` updated to the development database `5432`
 - Local `npm run dev` verified
 - Production `DATABASE_URL` configured to Supabase `6543`
 - Production `CRON_SECRET` configured in Vercel

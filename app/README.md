@@ -11,6 +11,7 @@ npm install
 ```
 
 2. Configure local environment variables in `app/.env.local`:
+   Use a dedicated development database here, not the production database.
 
 ```env
 DATABASE_URL="postgresql://..."
@@ -46,7 +47,7 @@ curl -i \
 ## Production Notes
 
 - Set `APP_BASE_URL` to `https://budledge.dev` in production.
-- Set `DATABASE_URL`, `APP_BASE_URL`, `RESEND_API_KEY`, `MAIL_FROM`, and `CRON_SECRET` in Vercel.
+- Set a production-only `DATABASE_URL` plus `APP_BASE_URL`, `RESEND_API_KEY`, `MAIL_FROM`, and `CRON_SECRET` in Vercel.
 - If `CRON_SECRET` is missing, scheduled delivery can fail before any `DailyDelivery` rows are created.
 
 ## Related Docs
