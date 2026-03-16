@@ -141,6 +141,8 @@ export async function sendQuestionEmails(input?: {
         name: user.name,
         questionPrompt: question.prompt,
         questionLink: buildDailyQuestionLink(question.id),
+        category: question.category,
+        categorySub: question.category_sub,
         choiceA: question.choice_a,
         choiceB: question.choice_b,
         choiceC: question.choice_c,

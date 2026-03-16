@@ -81,6 +81,8 @@ ${input.magicLink}
 function buildDailyQuestionEmailHtml(input: {
   questionLink: string;
   questionPrompt: string;
+  category: string;
+  categorySub?: string | null;
   choiceA: string;
   choiceB: string;
   choiceC: string;
@@ -97,6 +99,8 @@ function buildDailyQuestionEmailHtml(input: {
   const dashboardLink = escapeHtml(new URL("/dashboard", getBaseUrl()).toString());
   const questionLink = escapeHtml(input.questionLink);
   const questionPrompt = escapeHtml(input.questionPrompt);
+  const category = escapeHtml(input.category);
+  const categorySub = input.categorySub?.trim() ? escapeHtml(input.categorySub) : null;
   const choiceA = escapeHtml(input.choiceA);
   const choiceB = escapeHtml(input.choiceB);
   const choiceC = escapeHtml(input.choiceC);
@@ -117,6 +121,10 @@ function buildDailyQuestionEmailHtml(input: {
         </p>
         <div style="margin:24px 0 0;padding:20px 22px;background:#f1f7db;border-radius:20px;">
           <p style="margin:0 0 10px;color:#5d6b2f;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">Today's Question</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;">
+            <span style="display:inline-flex;background:#ffffff;border:1px solid rgba(87,212,0,0.2);border-radius:999px;color:#44a800;font-size:12px;font-weight:700;letter-spacing:0.02em;padding:6px 10px;">${category}</span>
+            ${categorySub ? `<span style="display:inline-flex;background:rgba(37,37,37,0.04);border:1px solid rgba(37,37,37,0.08);border-radius:999px;color:#252525;font-size:12px;font-weight:700;letter-spacing:0.02em;padding:6px 10px;">${categorySub}</span>` : ""}
+          </div>
           <p style="margin:0;font-size:18px;line-height:1.7;font-weight:700;">${questionPrompt}</p>
         </div>
         <div style="margin:24px 0 0;">
@@ -154,6 +162,8 @@ function buildDailyQuestionEmailHtml(input: {
 function buildDailyQuestionEmailText(input: {
   questionLink: string;
   questionPrompt: string;
+  category: string;
+  categorySub?: string | null;
   choiceA: string;
   choiceB: string;
   choiceC: string;
@@ -169,6 +179,8 @@ function buildDailyQuestionEmailText(input: {
   return `${greeting}
 
 今日の1問をお届けします。
+
+カテゴリ: ${input.category}${input.categorySub?.trim() ? ` / ${input.categorySub.trim()}` : ""}
 
 問題:
 ${input.questionPrompt}
@@ -214,6 +226,8 @@ export async function sendDailyQuestionEmail(input: {
   to: string;
   questionLink: string;
   questionPrompt: string;
+  category: string;
+  categorySub?: string | null;
   choiceA: string;
   choiceB: string;
   choiceC: string;
