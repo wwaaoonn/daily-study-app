@@ -38,6 +38,7 @@ They answer the question through a web interface and can challenge more question
 ## Environment Variables
 
 Set these in `app/.env.local` for local development and in your hosting platform for production.
+Use different database credentials for each environment. Do not reuse the production database from local development.
 
 ```env
 DATABASE_URL="postgresql://..."
@@ -50,6 +51,7 @@ CRON_SECRET="your-shared-secret"
 For production:
 
 - set `APP_BASE_URL` to `https://budledge.dev`
+- use a production-only `DATABASE_URL`
 - set `CRON_SECRET` in Vercel Production so scheduled requests can authenticate to `/api/cron/daily-question`
 - set `RESEND_API_KEY` and `MAIL_FROM` in the same environment that should send daily emails
 
